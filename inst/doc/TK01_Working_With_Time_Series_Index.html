@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Matt Dancho" />
+
+<meta name="date" content="2017-07-25" />
+
+<title>Working with the Time Series Index using timetk</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+
+
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Working with the Time Series Index using timetk</h1>
+<h4 class="author"><em>Matt Dancho</em></h4>
+<h4 class="date"><em>2017-07-25</em></h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#prerequisites">Prerequisites</a></li>
+<li><a href="#data">Data</a></li>
+<li><a href="#extract-an-index">Extract an index</a><ul>
+<li><a href="#tk_index">tk_index</a></li>
+</ul></li>
+<li><a href="#analyze-the-index">Analyze the index</a><ul>
+<li><a href="#tk_get_timeseries_signature-and-tk_augment_timeseries_signature">tk_get_timeseries_signature and tk_augment_timeseries_signature</a></li>
+<li><a href="#tk_get_timeseries_summary">tk_get_timeseries_summary</a></li>
+</ul></li>
+</ul>
+</div>
+
+<blockquote>
+<p>A collection of tools for working with time series in R</p>
+</blockquote>
+<p>The <strong>time series index</strong>, which consists of a collection of time-based values that define <em>when</em> each observation occurred, is the most important part of a time series object. The index gives the user a lot of information in a simple timestamp. Consider the datetime “2016-01-01 00:00:00”. From this timestamp, we can decompose the datetime to get the <strong>signature</strong>, which consists of the year, quarter, month, day, day of year, day of month, hour, minute, and second of the occurrence of a single observation. Further, the difference between two or more observations is the <strong>frequency</strong> from which we can obtain even more information such as the periodicity of the data and whether or not these observations are on a regular interval. This information is critical as it provides the basis for performance over time in finance, decay rates in biology, growth rates in economics, and so on.</p>
+<p>In this vignette the user will be exposed to the time series index, tools to gain insights and work with it, and methods to work with time series data in general. The user will see several functions that can help to efficiently extract and analyze a time series index. Further, the user will see how to decompose an index (i.e. create a signature) and how to efficiently add the signature to a time series object (<code>tbl</code> with time basis, <code>xts</code> or <code>zoo</code> objects). In addition, the user will learn about summary metrics.</p>
+<div id="prerequisites" class="section level1">
+<h1>Prerequisites</h1>
+<p>Before we get started, load the following packages.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(tidyquant)
+<span class="kw">library</span>(timetk)</code></pre></div>
+</div>
+<div id="data" class="section level1">
+<h1>Data</h1>
+<p>We’ll use the Facebook stock prices from the <code>FANG</code> data set from <code>tidyquant</code>. These are the historical stock prices (open, high, low, close, volume, and adjusted) for the “FB” stock from 2013 through 2016.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">FB_tbl &lt;-<span class="st"> </span>FANG <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(symbol <span class="op">==</span><span class="st"> &quot;FB&quot;</span>)
+FB_tbl</code></pre></div>
+<pre><code>## # A tibble: 1,008 x 8
+##    symbol       date  open  high   low close    volume adjusted
+##     &lt;chr&gt;     &lt;date&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+##  1     FB 2013-01-02 27.44 28.18 27.42 28.00  69846400    28.00
+##  2     FB 2013-01-03 27.88 28.47 27.59 27.77  63140600    27.77
+##  3     FB 2013-01-04 28.01 28.93 27.83 28.76  72715400    28.76
+##  4     FB 2013-01-07 28.69 29.79 28.65 29.42  83781800    29.42
+##  5     FB 2013-01-08 29.51 29.60 28.86 29.06  45871300    29.06
+##  6     FB 2013-01-09 29.67 30.60 29.49 30.59 104787700    30.59
+##  7     FB 2013-01-10 30.60 31.45 30.28 31.30  95316400    31.30
+##  8     FB 2013-01-11 31.28 31.96 31.10 31.72  89598000    31.72
+##  9     FB 2013-01-14 32.08 32.21 30.62 30.95  98892800    30.95
+## 10     FB 2013-01-15 30.64 31.71 29.88 30.10 173242600    30.10
+## # ... with 998 more rows</code></pre>
+<p>To simplify the tutorial, we will select only the “date” and “volume” columns. For the <code>FB_vol_date</code> data frame, we can see from the “date” column that the observations are <em>daily</em> beginning on the second day of 2013.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">FB_vol_date &lt;-<span class="st"> </span>FB_tbl <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>(date, volume)
+FB_vol_date</code></pre></div>
+<pre><code>## # A tibble: 1,008 x 2
+##          date    volume
+##        &lt;date&gt;     &lt;dbl&gt;
+##  1 2013-01-02  69846400
+##  2 2013-01-03  63140600
+##  3 2013-01-04  72715400
+##  4 2013-01-07  83781800
+##  5 2013-01-08  45871300
+##  6 2013-01-09 104787700
+##  7 2013-01-10  95316400
+##  8 2013-01-11  89598000
+##  9 2013-01-14  98892800
+## 10 2013-01-15 173242600
+## # ... with 998 more rows</code></pre>
+<p>To show examples using alternative time series classes, we’ll summarize the data as <code>yearqtr</code> from the <code>zoo</code> package. We now see from the “date” column that the observations are <em>quarterly</em> beginning on the first quarter of 2013.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">FB_vol_yearqtr &lt;-<span class="st"> </span>FB_vol_date <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">mutate</span>(<span class="dt">date =</span> <span class="kw">as.yearqtr</span>(date)) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">group_by</span>(date) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">summarize</span>(<span class="dt">volume =</span> <span class="kw">sum</span>(volume))
+FB_vol_yearqtr</code></pre></div>
+<pre><code>## # A tibble: 16 x 2
+##             date     volume
+##    &lt;S3: yearqtr&gt;      &lt;dbl&gt;
+##  1       2013 Q1 3360672000
+##  2       2013 Q2 2508935500
+##  3       2013 Q3 4366095000
+##  4       2013 Q4 4907480100
+##  5       2014 Q1 3660928900
+##  6       2014 Q2 3867510400
+##  7       2014 Q3 2340124400
+##  8       2014 Q4 2109135400
+##  9       2015 Q1 1596531700
+## 10       2015 Q2 1501555300
+## 11       2015 Q3 2135807400
+## 12       2015 Q4 1558813800
+## 13       2016 Q1 2188123300
+## 14       2016 Q2 1652751000
+## 15       2016 Q3 1212297600
+## 16       2016 Q4 1361185100</code></pre>
+</div>
+<div id="extract-an-index" class="section level1">
+<h1>Extract an index</h1>
+<div id="tk_index" class="section level2">
+<h2>tk_index</h2>
+<p>Before we can analyze an index, we need to extract it from the object. The function <code>tk_index()</code> extracts the index from any time series object including data frame (or <code>tbl</code>), <code>xts</code>, <code>zoo</code>, etc. The index is always returned in the native date, datetime, yearmon, or yearqtr format. Note that the index must be in one of these time-based classes for extraction to work:</p>
+<ul>
+<li>datetimes: Must inherit <code>POSIXt</code></li>
+<li>dates: Must inherit <code>Date</code></li>
+<li>yearmon: Must inherit <code>yearmon</code> from the <code>zoo</code> package</li>
+<li>yearqtr: Must inherit <code>yearqtr</code> from the <code>zoo</code> package</li>
+</ul>
+<p>Extract the index using <code>tk_index()</code>. The structure is shown to see the output format, which is a vector of dates.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># idx_date</span>
+idx_date &lt;-<span class="st"> </span><span class="kw">tk_index</span>(FB_vol_date)
+<span class="kw">str</span>(idx_date)</code></pre></div>
+<pre><code>##  Date[1:1008], format: &quot;2013-01-02&quot; &quot;2013-01-03&quot; &quot;2013-01-04&quot; &quot;2013-01-07&quot; &quot;2013-01-08&quot; ...</code></pre>
+<p>We can see a similar result with the yearqtr index. The obvious differences are fewer observations since the time series was aggregated quarterly and the output format is the <code>yearqtr</code> class.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># idx_yearqtr</span>
+idx_yearqtr &lt;-<span class="st"> </span><span class="kw">tk_index</span>(FB_vol_yearqtr)
+<span class="kw">paste0</span>(<span class="st">&quot;class: &quot;</span>, <span class="kw">class</span>(idx_yearqtr), <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>,
+       <span class="st">&quot;n.obs: &quot;</span>, <span class="kw">length</span>(idx_yearqtr), <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>,
+       <span class="st">&quot;head:  &quot;</span>, stringr<span class="op">::</span><span class="kw">str_c</span>(<span class="kw">head</span>(idx_yearqtr), <span class="dt">collapse =</span> <span class="st">&quot;, &quot;</span>)) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">cat</span>()</code></pre></div>
+<pre><code>## class: yearqtr
+## n.obs: 16
+## head:  2013 Q1, 2013 Q2, 2013 Q3, 2013 Q4, 2014 Q1, 2014 Q2</code></pre>
+</div>
+</div>
+<div id="analyze-the-index" class="section level1">
+<h1>Analyze the index</h1>
+<div id="tk_get_timeseries_signature-and-tk_augment_timeseries_signature" class="section level2">
+<h2>tk_get_timeseries_signature and tk_augment_timeseries_signature</h2>
+<p>The index can be decomposed into a <em>signature</em>. The time series signature is a unique set of properties of the time series values that describe the time series. The function <code>tk_get_timeseries_signature()</code> can be used to convert the index to a tibble containing the following values (columns):</p>
+<ul>
+<li><strong>index</strong>: The index value that was decomposed</li>
+<li><strong>index.num</strong>: The numeric value of the index in seconds. The base is “1970-01-01 00:00:00” (Execute <code>&quot;1970-01-01 00:00:00&quot; %&gt;% ymd_hms() %&gt;% as.numeric()</code> to see the value returned is zero). Every time series value after this date can be converted to a numeric value in seconds.</li>
+<li><strong>diff</strong>: The difference in seconds from the previous numeric index value.</li>
+<li><strong>year</strong>: The year component of the index.</li>
+<li><strong>year.iso</strong>: The ISO year number of the year (Monday start).</li>
+<li><strong>half</strong>: The half component of the index.</li>
+<li><strong>quarter</strong>: The quarter component of the index.</li>
+<li><strong>month</strong>: The month component of the index with base 1.</li>
+<li><strong>month.xts</strong>: The month component of the index with base 0, which is what <code>xts</code> implements.</li>
+<li><strong>month.lbl</strong>: The month label as an ordered factor begining with January and ending with December.</li>
+<li><strong>day</strong>: The day component of the index.</li>
+<li><strong>hour</strong>: The hour component of the index.</li>
+<li><strong>minute</strong>: The minute component of the index.</li>
+<li><strong>second</strong>: The second component of the index.</li>
+<li><strong>hour12</strong>: The hour component on a 12 hour scale.</li>
+<li><strong>am.pm</strong>: Morning (AM) = 1, Afternoon (PM) = 2.</li>
+<li><strong>wday</strong>: The day of the week with base 1. Sunday = 1 and Saturday = 7.</li>
+<li><strong>wday.xts</strong>: The day of the week with base 0, which is what <code>xts</code> implements. Sunday = 0 and Saturday = 6.</li>
+<li><strong>wday.lbl</strong>: The day of the week label as an ordered factor begining with Sunday and ending with Saturday.</li>
+<li><strong>mday</strong>: The day of the month.</li>
+<li><strong>qday</strong>: The day of the quarter.</li>
+<li><strong>yday</strong>: The day of the year.</li>
+<li><strong>mweek</strong>: The week of the month.</li>
+<li><strong>week</strong>: The week number of the year (Sunday start).</li>
+<li><strong>week.iso</strong>: The ISO week number of the year (Monday start).</li>
+<li><strong>week2</strong>: The modulus for bi-weekly frequency.</li>
+<li><strong>week3</strong>: The modulus for tri-weekly frequency.</li>
+<li><strong>week4</strong>: The modulus for quad-weekly frequency.</li>
+<li><strong>mday7</strong>: The integer division of day of the month by seven, which returns the first, second, third, … instance the day has appeared in the month. Values begin at 1. For example, the first Saturday in the month has mday7 = 1. The second has mday7 = 2.</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># idx_date signature</span>
+<span class="kw">tk_get_timeseries_signature</span>(idx_date)</code></pre></div>
+<pre><code>## # A tibble: 1,008 x 29
+##         index  index.num   diff  year year.iso  half quarter month
+##        &lt;date&gt;      &lt;int&gt;  &lt;int&gt; &lt;int&gt;    &lt;int&gt; &lt;int&gt;   &lt;int&gt; &lt;int&gt;
+##  1 2013-01-02 1357084800     NA  2013     2013     1       1     1
+##  2 2013-01-03 1357171200  86400  2013     2013     1       1     1
+##  3 2013-01-04 1357257600  86400  2013     2013     1       1     1
+##  4 2013-01-07 1357516800 259200  2013     2013     1       1     1
+##  5 2013-01-08 1357603200  86400  2013     2013     1       1     1
+##  6 2013-01-09 1357689600  86400  2013     2013     1       1     1
+##  7 2013-01-10 1357776000  86400  2013     2013     1       1     1
+##  8 2013-01-11 1357862400  86400  2013     2013     1       1     1
+##  9 2013-01-14 1358121600 259200  2013     2013     1       1     1
+## 10 2013-01-15 1358208000  86400  2013     2013     1       1     1
+## # ... with 998 more rows, and 21 more variables: month.xts &lt;int&gt;,
+## #   month.lbl &lt;ord&gt;, day &lt;int&gt;, hour &lt;int&gt;, minute &lt;int&gt;, second &lt;int&gt;,
+## #   hour12 &lt;int&gt;, am.pm &lt;int&gt;, wday &lt;int&gt;, wday.xts &lt;int&gt;, wday.lbl &lt;ord&gt;,
+## #   mday &lt;int&gt;, qday &lt;int&gt;, yday &lt;int&gt;, mweek &lt;int&gt;, week &lt;int&gt;,
+## #   week.iso &lt;int&gt;, week2 &lt;int&gt;, week3 &lt;int&gt;, week4 &lt;int&gt;, mday7 &lt;int&gt;</code></pre>
+<p>We can also get the signature of other time-based objects. The <code>tk_get_timeseries_signature()</code> function works with date, datetime, yearmon, and yearqtr vectors.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># idx_yearqtr signature</span>
+<span class="kw">tk_get_timeseries_signature</span>(idx_yearqtr)</code></pre></div>
+<pre><code>## # A tibble: 16 x 29
+##            index  index.num    diff  year year.iso  half quarter month
+##    &lt;S3: yearqtr&gt;      &lt;int&gt;   &lt;int&gt; &lt;int&gt;    &lt;int&gt; &lt;int&gt;   &lt;int&gt; &lt;int&gt;
+##  1       2013 Q1 1356998400      NA  2013     2013     1       1     1
+##  2       2013 Q2 1364774400 7776000  2013     2013     1       2     4
+##  3       2013 Q3 1372636800 7862400  2013     2013     2       3     7
+##  4       2013 Q4 1380585600 7948800  2013     2013     2       4    10
+##  5       2014 Q1 1388534400 7948800  2014     2014     1       1     1
+##  6       2014 Q2 1396310400 7776000  2014     2014     1       2     4
+##  7       2014 Q3 1404172800 7862400  2014     2014     2       3     7
+##  8       2014 Q4 1412121600 7948800  2014     2014     2       4    10
+##  9       2015 Q1 1420070400 7948800  2015     2015     1       1     1
+## 10       2015 Q2 1427846400 7776000  2015     2015     1       2     4
+## 11       2015 Q3 1435708800 7862400  2015     2015     2       3     7
+## 12       2015 Q4 1443657600 7948800  2015     2015     2       4    10
+## 13       2016 Q1 1451606400 7948800  2016     2015     1       1     1
+## 14       2016 Q2 1459468800 7862400  2016     2016     1       2     4
+## 15       2016 Q3 1467331200 7862400  2016     2016     2       3     7
+## 16       2016 Q4 1475280000 7948800  2016     2016     2       4    10
+## # ... with 21 more variables: month.xts &lt;int&gt;, month.lbl &lt;ord&gt;, day &lt;int&gt;,
+## #   hour &lt;int&gt;, minute &lt;int&gt;, second &lt;int&gt;, hour12 &lt;int&gt;, am.pm &lt;int&gt;,
+## #   wday &lt;int&gt;, wday.xts &lt;int&gt;, wday.lbl &lt;ord&gt;, mday &lt;int&gt;, qday &lt;int&gt;,
+## #   yday &lt;int&gt;, mweek &lt;int&gt;, week &lt;int&gt;, week.iso &lt;int&gt;, week2 &lt;int&gt;,
+## #   week3 &lt;int&gt;, week4 &lt;int&gt;, mday7 &lt;int&gt;</code></pre>
+<p>It’s usually important to keep the index signature with the values (e.g. volume in our example). We can use an expedited approach with <code>tk_augment_timeseries_signature()</code>, which adds the signature to the end of the time series object. Note that <code>xts</code> and <code>zoo</code> objects only retain numeric columns and therefore “month.lbl” and “wday.lbl” columns will be dropped. We’ll use the <code>tk_augment_timeseries_signature()</code> function on the dataframe <code>FB_vol_date</code> which contains the date and volume columns.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Augmenting a data frame</span>
+FB_vol_date_signature &lt;-<span class="st"> </span><span class="kw">tk_augment_timeseries_signature</span>(FB_vol_date)
+FB_vol_date_signature</code></pre></div>
+<pre><code>## # A tibble: 1,008 x 30
+##          date    volume  index.num   diff  year year.iso  half quarter
+##        &lt;date&gt;     &lt;dbl&gt;      &lt;int&gt;  &lt;int&gt; &lt;int&gt;    &lt;int&gt; &lt;int&gt;   &lt;int&gt;
+##  1 2013-01-02  69846400 1357084800     NA  2013     2013     1       1
+##  2 2013-01-03  63140600 1357171200  86400  2013     2013     1       1
+##  3 2013-01-04  72715400 1357257600  86400  2013     2013     1       1
+##  4 2013-01-07  83781800 1357516800 259200  2013     2013     1       1
+##  5 2013-01-08  45871300 1357603200  86400  2013     2013     1       1
+##  6 2013-01-09 104787700 1357689600  86400  2013     2013     1       1
+##  7 2013-01-10  95316400 1357776000  86400  2013     2013     1       1
+##  8 2013-01-11  89598000 1357862400  86400  2013     2013     1       1
+##  9 2013-01-14  98892800 1358121600 259200  2013     2013     1       1
+## 10 2013-01-15 173242600 1358208000  86400  2013     2013     1       1
+## # ... with 998 more rows, and 22 more variables: month &lt;int&gt;,
+## #   month.xts &lt;int&gt;, month.lbl &lt;ord&gt;, day &lt;int&gt;, hour &lt;int&gt;, minute &lt;int&gt;,
+## #   second &lt;int&gt;, hour12 &lt;int&gt;, am.pm &lt;int&gt;, wday &lt;int&gt;, wday.xts &lt;int&gt;,
+## #   wday.lbl &lt;ord&gt;, mday &lt;int&gt;, qday &lt;int&gt;, yday &lt;int&gt;, mweek &lt;int&gt;,
+## #   week &lt;int&gt;, week.iso &lt;int&gt;, week2 &lt;int&gt;, week3 &lt;int&gt;, week4 &lt;int&gt;,
+## #   mday7 &lt;int&gt;</code></pre>
+<p>Analyzing the time series is now easier with the decomposed measures. For example, we can create a month plot very easily in <code>ggplot2</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Example Benefit 1: Making a month plot</span>
+FB_vol_monthly &lt;-<span class="st"> </span>FB_vol_date_signature <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">group_by</span>(year, month.lbl) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">summarize</span>(<span class="dt">volume =</span> <span class="kw">sum</span>(volume)) 
+
+FB_vol_monthly <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(<span class="dt">x =</span> month.lbl, <span class="dt">y =</span> volume, <span class="dt">fill =</span> <span class="kw">factor</span>(year))) <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_bar</span>(<span class="dt">stat =</span> <span class="st">&quot;identity&quot;</span>) <span class="op">+</span>
+<span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Month Plot of FB Volume&quot;</span>, <span class="dt">x =</span><span class="st">&quot;&quot;</span>, <span class="dt">fill =</span> <span class="st">&quot;Year&quot;</span>,
+         <span class="dt">subtitle =</span> <span class="st">&quot;Analyzing time-based metrics is easy with time series signature&quot;</span>) <span class="op">+</span>
+<span class="st">    </span><span class="kw">theme_tq</span>() <span class="op">+</span>
+<span class="st">    </span><span class="kw">theme</span>(<span class="dt">axis.text.x =</span> <span class="kw">element_text</span>(<span class="dt">angle =</span> <span class="dv">45</span>, <span class="dt">hjust =</span> <span class="dv">1</span>)) <span class="op">+</span>
+<span class="st">    </span><span class="kw">scale_fill_tq</span>() <span class="op">+</span>
+<span class="st">    </span><span class="kw">scale_y_continuous</span>(<span class="dt">labels =</span> scales<span class="op">::</span>comma)</code></pre></div>
+<p><img src="data:image/png;base64,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" width="95%" style="display: block; margin: auto;" /></p>
+<p>Modeling is also much easier. As an example, we can use linear regression model using the <code>lm()</code> function with the month and year as a predictor of volume.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Example Benefit 2: Modeling is easier</span>
+fit &lt;-<span class="st"> </span><span class="kw">lm</span>(volume <span class="op">~</span><span class="st"> </span>year <span class="op">+</span><span class="st"> </span>month.lbl, <span class="dt">data =</span> FB_vol_monthly)
+<span class="kw">summary</span>(fit)</code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = volume ~ year + month.lbl, data = FB_vol_monthly)
+## 
+## Residuals:
+##        Min         1Q     Median         3Q        Max 
+## -630168696 -241179924   -2717615  163606096  776716101 
+## 
+## Coefficients:
+##                Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)   5.275e+11  8.527e+10   6.186 4.40e-07 ***
+## year         -2.614e+08  4.233e+07  -6.176 4.53e-07 ***
+## month.lbl.L  -1.492e+08  1.639e+08  -0.910    0.369    
+## month.lbl.Q   1.035e+08  1.639e+08   0.632    0.532    
+## month.lbl.C  -2.024e+08  1.639e+08  -1.235    0.225    
+## month.lbl^4  -3.825e+07  1.639e+08  -0.233    0.817    
+## month.lbl^5  -7.598e+07  1.639e+08  -0.463    0.646    
+## month.lbl^6   1.280e+08  1.639e+08   0.781    0.440    
+## month.lbl^7   1.356e+07  1.639e+08   0.083    0.935    
+## month.lbl^8   5.948e+07  1.639e+08   0.363    0.719    
+## month.lbl^9   2.479e+08  1.639e+08   1.512    0.140    
+## month.lbl^10 -9.894e+07  1.639e+08  -0.604    0.550    
+## month.lbl^11 -1.019e+08  1.639e+08  -0.622    0.538    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 327900000 on 35 degrees of freedom
+## Multiple R-squared:  0.5622, Adjusted R-squared:  0.4121 
+## F-statistic: 3.746 on 12 and 35 DF,  p-value: 0.001102</code></pre>
+</div>
+<div id="tk_get_timeseries_summary" class="section level2">
+<h2>tk_get_timeseries_summary</h2>
+<p>The next index analysis tool is the summary metrics, which can be retrieved using the <code>tk_get_timeseries_summary()</code> function. The summary reports the following attributes as a single-row tibble.</p>
+<p><em>General Summary</em>:</p>
+<p>The first six columns are general summary information.</p>
+<ul>
+<li><strong>n.obs</strong>: The total number of observations</li>
+<li><strong>start</strong>: The start in the appropriate time class</li>
+<li><strong>end</strong>: The end in the appropriate time class</li>
+<li><strong>units</strong>: A label that describes the unit of the index value that is independent of frequency (i.e. a date class will always be “days” whereas a datetime class will always be “seconds”). Values can be days, hours, mins, secs.</li>
+<li><strong>scale</strong>: A label that describes the the median difference (frequency) between observations. Values can be quarter, month, day, hour, minute, second.</li>
+<li><strong>tzone</strong>: The timezone of the index.</li>
+</ul>
+<p><em>Differences Summary</em>:</p>
+<p>The next group of values are the <strong>differences summary</strong> (i.e. summary of frequency). All values are in seconds:</p>
+<ul>
+<li><strong>diff.minimum</strong>: The minimum difference between index values.</li>
+<li><strong>diff.q1</strong>: The first quartile of the index differences.</li>
+<li><strong>diff.median</strong>: The median difference between index values (i.e. most common frequency).</li>
+<li><strong>diff.mean</strong>: The average difference between index values.</li>
+<li><strong>diff.q3</strong>: The third quartile of the index differences.</li>
+<li><strong>diff.maximum</strong>: The maximum difference between index values.</li>
+</ul>
+<p>The <strong>differences</strong> provide information about the <em>regularity of the frequency</em>. Generally speaking if all difference values are equal, the index is regular. However, scales beyond “day” are never theoretically regular since the differences in seconds are not equivalent. However, conceptually monthly, quarterly and yearly data can be thought of as regular if the index contains consecutive months, quarters, or years, respectively. Therefore, the difference attributes are most meaningful for daily and lower time scales because the difference summary always indicates level of regularity.</p>
+<p>We can get the time series summary using <code>tk_get_timeseries_summary()</code>. We’ll split the output into six columns to view in the vignette. From the first group summary (general summary), we recognize that there are 1008 observations that span 2013 through 2016. The “units” of each index value are in “days”, and the “scale” of the index values is “day” for daily periodicity.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># idx_date: First six columns, general summary</span>
+<span class="kw">tk_get_timeseries_summary</span>(idx_date)[,<span class="dv">1</span><span class="op">:</span><span class="dv">6</span>]</code></pre></div>
+<pre><code>## # A tibble: 1 x 6
+##   n.obs      start        end units scale tzone
+##   &lt;int&gt;     &lt;date&gt;     &lt;date&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;
+## 1  1008 2013-01-02 2016-12-30  days   day   UTC</code></pre>
+<p>From the second group (differences summary), we immediately recognize that the mean is different than the median and therefore the index is <em>irregular</em> (meaning certain days are missing). Further we can see that the maximum difference is 345,600 seconds, indicating the maximum difference is 4 days (345,600 seconds / 86400 seconds/day).</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># idx_date: Last six columns, difference summary</span>
+<span class="kw">tk_get_timeseries_summary</span>(idx_date)[,<span class="dv">7</span><span class="op">:</span><span class="dv">12</span>]</code></pre></div>
+<pre><code>## # A tibble: 1 x 6
+##   diff.minimum diff.q1 diff.median diff.mean diff.q3 diff.maximum
+##          &lt;dbl&gt;   &lt;dbl&gt;       &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;        &lt;dbl&gt;
+## 1        86400   86400       86400  125095.5   86400       345600</code></pre>
+<p>We can also get the summary from the quarterly data using <code>tk_get_timeseries_summary()</code>. The general summary for the quarterly output may not be what is expected because the “units” are reported as “days”. This is because the maximum unit for an index value is days regardless of timeseries class. As anticipated the scale is “quarterly”.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># idx_yearqtr: First six columns, general summary</span>
+<span class="kw">tk_get_timeseries_summary</span>(idx_yearqtr)[,<span class="dv">1</span><span class="op">:</span><span class="dv">6</span>]</code></pre></div>
+<pre><code>## # A tibble: 1 x 6
+##   n.obs         start           end units   scale tzone
+##   &lt;int&gt; &lt;S3: yearqtr&gt; &lt;S3: yearqtr&gt; &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt;
+## 1    16       2013 Q1       2016 Q4  days quarter   UTC</code></pre>
+<p>The difference summary indicates that the timeseries is <em>irregular</em>, which also may not be what is expected. This is because, when measured in seconds, the difference values between observations (quarters) varies. Some quarters have more seconds than others. With this said, the quarterly data can be conceptualized as <em>regular</em> because the class is quarterly with all consecutive quarters present in the timespan.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># idx_yearqtr: Last six columns, difference summary</span>
+<span class="kw">tk_get_timeseries_summary</span>(idx_yearqtr)[,<span class="dv">7</span><span class="op">:</span><span class="dv">12</span>]</code></pre></div>
+<pre><code>## # A tibble: 1 x 6
+##   diff.minimum diff.q1 diff.median diff.mean diff.q3 diff.maximum
+##          &lt;dbl&gt;   &lt;dbl&gt;       &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;        &lt;dbl&gt;
+## 1      7776000 7862400     7862400   7885440 7948800      7948800</code></pre>
+</div>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
