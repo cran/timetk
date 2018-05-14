@@ -63,7 +63,8 @@ str(ten_year_treasury_rate_ts_timetk)
 
 ## ------------------------------------------------------------------------
 # Can now retrieve the original date index
-timetk_index <- tk_index(ten_year_treasury_rate_ts_timetk, timetk_idx = TRUE)
+timetk_index <- ten_year_treasury_rate_ts_timetk %>%
+    tk_index(timetk_idx = TRUE)
 head(timetk_index)
 class(timetk_index)
 

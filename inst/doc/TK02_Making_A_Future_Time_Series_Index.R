@@ -96,8 +96,10 @@ idx_future_wdays_months_skip_vals %>%
 FB_tbl <- FANG %>%
     filter(symbol %in% "FB") 
 
-FB_train <- filter(FB_tbl, year(date) < 2016)
-FB_test  <- filter(FB_tbl, year(date) >= 2016)
+FB_train <- FB_tbl %>%
+    filter(year(date) < 2016)
+FB_test  <- FB_tbl %>%
+    filter(year(date) >= 2016)
 
 idx_train <- tk_index(FB_train)
 idx_test  <- tk_index(FB_test)

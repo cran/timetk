@@ -115,16 +115,16 @@ ggplot(aes(x = date), data = bikes) +
 
 ## ------------------------------------------------------------------------
 # Calculating forecast error
-test_residuals <- pred_test$.resid
-pct_err <- test_residuals/pred_test$cnt * 100 # Percentage error
+error_tbl <- pred_test %>%
+  mutate(pct_err = .resid/cnt * 100) %>%
+  summarize(
+    me = mean(.resid, na.rm = TRUE),
+    rmse = mean(.resid^2, na.rm = TRUE)^0.5,
+    mae = mean(abs(.resid), na.rm = TRUE),
+    mape = mean(abs(pct_err), na.rm = TRUE),
+    mpe = mean(pct_err, na.rm = TRUE)
+  )
 
-me   <- mean(test_residuals, na.rm=TRUE)
-rmse <- mean(test_residuals^2, na.rm=TRUE)^0.5
-mae  <- mean(abs(test_residuals), na.rm=TRUE)
-mape <- mean(abs(pct_err), na.rm=TRUE)
-mpe  <- mean(pct_err, na.rm=TRUE)
-
-error_tbl <- tibble(me, rmse, mae, mape, mpe)
 error_tbl
 
 ## ------------------------------------------------------------------------
@@ -196,7 +196,7 @@ bikes %>%
 
 ## ------------------------------------------------------------------------
 # Calculate standard deviation of residuals
-test_resid_sd <- sd(test_residuals)
+test_resid_sd <- sd(pred_test$.resid)
 
 bikes_future <- bikes_future %>%
     mutate(
