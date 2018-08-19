@@ -1,7 +1,7 @@
 Package: timetk
 Type: Package
 Title: A Tool Kit for Working with Time Series in R
-Version: 0.1.1
+Version: 0.1.1.1
 Date: 2018-05-14
 Authors@R: c(
     person("Matt", "Dancho", email = "mdancho@business-science.io", role = c("aut", "cre")),
@@ -23,13 +23,17 @@ Imports: devtools (>= 1.12.0), dplyr (>= 0.7.0), forecast (>= 0.8.0),
         purrr (>= 0.2.2), readr (>= 1.0.0), stringi (>= 1.1.5), tibble
         (>= 1.2), tidyr (>= 0.6.1), xts (>= 0.9-7), zoo (>= 1.7-14)
 Suggests: broom, forcats, knitr, rmarkdown, robets, scales, stringr,
-        testthat, tidyverse, tidyquant, timeSeries
+        testthat, tidyverse, tidyquant, timeSeries, fracdiff, timeDate,
+        tseries
 RoxygenNote: 6.0.1
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2018-05-14 19:18:53 UTC; davisvaughan
+Packaged: 2018-08-19 08:39:19 UTC; hornik
 Author: Matt Dancho [aut, cre],
   Davis Vaughan [aut]
-Maintainer: Matt Dancho <mdancho@business-science.io>
+Maintainer: ORPHANED
 Repository: CRAN
-Date/Publication: 2018-05-14 19:43:06 UTC
+Date/Publication: 2018-08-19 08:51:43 UTC
+X-CRAN-Original-Maintainer: Matt Dancho <mdancho@business-science.io>
+X-CRAN-Comment: Orphaned and corrected on 2018-08-19 as check problems
+        were not corrected despite reminders.
