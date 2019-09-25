@@ -8,15 +8,14 @@ knitr::opts_chunk$set(
     out.width='95%', 
     dpi = 200
 )
+
+# devtools::load_all() # Travis CI fails on load_all()
+
+## ---- message = FALSE----------------------------------------------------
+library(tidyverse)
 library(tidyquant)
 library(timetk)
 library(broom)
-# devtools::load_all() # Travis CI fails on load_all()
-
-## ---- eval = F-----------------------------------------------------------
-#  library(tidyquant)
-#  library(timetk)
-#  library(broom)
 
 ## ------------------------------------------------------------------------
 # Read data

@@ -1,3 +1,8 @@
+# timetk 0.1.2
+
+* Compatability with `tidyquant` v0.5.7 - Removed dependency on `tidyverse`
+* Dependency cleanup - removed devtools and other unncessary dependencies.
+
 # timetk 0.1.1
 
 * Added `timeSeries` to Suggests to satisfy a CRAN issue.

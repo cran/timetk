@@ -8,13 +8,13 @@ knitr::opts_chunk$set(
     out.width='95%', 
     dpi = 200
 )
-library(tidyquant)
-library(timetk)
+
 # devtools::load_all() # Travis CI fails on load_all()
 
-## ---- eval = F-----------------------------------------------------------
-#  library(tidyquant)
-#  library(timetk)
+## ---- message=FALSE------------------------------------------------------
+library(tidyverse)
+library(tidyquant)
+library(timetk)
 
 ## ------------------------------------------------------------------------
 # Create sequence with omitted weekends and omitted last two weeks of each year

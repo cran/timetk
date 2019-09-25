@@ -8,14 +8,13 @@ knitr::opts_chunk$set(
     out.width='95%', 
     dpi = 200
 )
-library(tidyquant)
-library(timetk)
-library(forecast)
+
 # devtools::load_all() # Travis CI fails on load_all()
 
-## ---- eval = F-----------------------------------------------------------
-#  library(tidyquant)
-#  library(timetk)
+## ---- message=FALSE------------------------------------------------------
+library(tidyverse)
+library(tidyquant)
+library(timetk)
 
 ## ------------------------------------------------------------------------
 ten_year_treasury_rate_tbl <- tq_get("DGS10", 

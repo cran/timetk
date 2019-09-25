@@ -8,14 +8,13 @@ knitr::opts_chunk$set(
     out.width='95%', 
     dpi = 200
 )
-library(tidyquant)
-library(timetk)
-library(forecast)
+
 # devtools::load_all() # Travis CI fails on load_all()
 
-## ---- eval = F-----------------------------------------------------------
-#  library(tidyquant)
-#  library(timetk)
+## ---- message = F--------------------------------------------------------
+library(tidyverse)
+library(tidyquant)
+library(timetk)
 
 ## ------------------------------------------------------------------------
 FB_tbl <- FANG %>% filter(symbol == "FB")
