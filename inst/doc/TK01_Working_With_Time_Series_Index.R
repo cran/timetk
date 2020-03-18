@@ -1,4 +1,4 @@
-## ---- echo = FALSE, message = FALSE, warning = FALSE---------------------
+## ---- echo = FALSE, message = FALSE, warning = FALSE--------------------------
 knitr::opts_chunk$set(
     # message = FALSE,
     # warning = FALSE,
@@ -11,32 +11,32 @@ knitr::opts_chunk$set(
 
 # devtools::load_all() # Travis CI fails on load_all()
 
-## ---- message = F--------------------------------------------------------
+## ---- message = F-------------------------------------------------------------
 library(tidyverse)
 library(tidyquant)
 library(timetk)
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 FB_tbl <- FANG %>% filter(symbol == "FB")
 FB_tbl
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 FB_vol_date <- FB_tbl %>% select(date, volume)
 FB_vol_date
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 FB_vol_yearqtr <- FB_vol_date %>%
     mutate(date = as.yearqtr(date)) %>%
     group_by(date) %>%
     summarize(volume = sum(volume))
 FB_vol_yearqtr
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 # idx_date
 idx_date <- tk_index(FB_vol_date)
 str(idx_date)
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 # idx_yearqtr
 idx_yearqtr <- tk_index(FB_vol_yearqtr)
 paste0("class: ", class(idx_yearqtr), "\n",
@@ -44,20 +44,20 @@ paste0("class: ", class(idx_yearqtr), "\n",
        "head:  ", stringr::str_c(head(idx_yearqtr), collapse = ", ")) %>%
     cat()
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 # idx_date signature
 tk_get_timeseries_signature(idx_date)
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 # idx_yearqtr signature
 tk_get_timeseries_signature(idx_yearqtr)
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 # Augmenting a data frame
 FB_vol_date_signature <- tk_augment_timeseries_signature(FB_vol_date)
 FB_vol_date_signature
 
-## ---- fig.height=6-------------------------------------------------------
+## ---- fig.height=6------------------------------------------------------------
 # Example Benefit 1: Making a month plot
 FB_vol_monthly <- FB_vol_date_signature %>%
     group_by(year, month.lbl) %>%
@@ -74,24 +74,24 @@ FB_vol_monthly %>%
     scale_y_continuous(labels = scales::comma)
         
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 # Example Benefit 2: Modeling is easier
 fit <- lm(volume ~ year + month.lbl, data = FB_vol_monthly)
 summary(fit)
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 # idx_date: First six columns, general summary
 tk_get_timeseries_summary(idx_date)[,1:6]
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 # idx_date: Last six columns, difference summary
 tk_get_timeseries_summary(idx_date)[,7:12]
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 # idx_yearqtr: First six columns, general summary
 tk_get_timeseries_summary(idx_yearqtr)[,1:6]
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 # idx_yearqtr: Last six columns, difference summary
 tk_get_timeseries_summary(idx_yearqtr)[,7:12]
 

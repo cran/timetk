@@ -1,4 +1,4 @@
-## ---- echo = FALSE, message = FALSE, warning = FALSE---------------------
+## ---- echo = FALSE, message = FALSE, warning = FALSE--------------------------
 knitr::opts_chunk$set(
     message = FALSE,
     warning = FALSE,
@@ -11,12 +11,12 @@ knitr::opts_chunk$set(
 
 # devtools::load_all() # Travis CI fails on load_all()
 
-## ---- message=FALSE------------------------------------------------------
+## ---- message=FALSE-----------------------------------------------------------
 library(tidyverse)
 library(tidyquant)
 library(timetk)
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 # Create sequence with omitted weekends and omitted last two weeks of each year
 idx <- seq.Date(ymd("2010-01-01"), by = "day", length.out = 1110) %>%
     tk_get_timeseries_signature() %>%
@@ -27,7 +27,7 @@ idx <- seq.Date(ymd("2010-01-01"), by = "day", length.out = 1110) %>%
 idx_train <- idx[1:500]
 idx_test  <- idx[501:length(idx)]
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 idx_test %>%
     tk_get_timeseries_signature() %>%
     ggplot(aes(x = index, y = diff)) +
@@ -37,7 +37,7 @@ idx_test %>%
          subtitle = "Missing weekends and missing last two weeks of year") +
     scale_y_continuous(limits = c(0, 2.2e6))
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 idx_train %>%
     tk_make_future_timeseries(n_future = 395, inspect_weekdays = TRUE) %>%
     tk_get_timeseries_signature() %>%
@@ -48,7 +48,7 @@ idx_train %>%
          subtitle = "Catches missing weekends only") +
     scale_y_continuous(limits = c(0, 2.2e6))
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 idx %>%
     tk_make_future_timeseries(n_future = 395, inspect_months = TRUE) %>%
     tk_get_timeseries_signature() %>%
@@ -59,7 +59,7 @@ idx %>%
          subtitle = "Catches missing last two weeks of year only") +
     scale_y_continuous(limits = c(0, 2.2e6))
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 idx_future_wdays_and_months <- idx_train %>%
     tk_make_future_timeseries(n_future = 395, inspect_weekdays = T, inspect_months = T) 
 idx_future_wdays_and_months %>%
@@ -71,13 +71,13 @@ idx_future_wdays_and_months %>%
          subtitle = "For most part catches missing weekends and last two weeks of year") +
     scale_y_continuous(limits = c(0, 2.2e6))
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 idx_test[!(idx_test %in% idx_future_wdays_and_months)]
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 idx_future_wdays_and_months[!(idx_future_wdays_and_months %in% idx_test)]
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 idx_future_wdays_months_skip_vals <- idx_train %>%
     tk_make_future_timeseries(n_future = 395, 
                               inspect_weekdays = T, 
@@ -92,7 +92,7 @@ idx_future_wdays_months_skip_vals %>%
          subtitle = "Get the exact solution using skip values") +
     scale_y_continuous(limits = c(0, 2.2e6))
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 FB_tbl <- FANG %>%
     filter(symbol %in% "FB") 
 
@@ -104,7 +104,7 @@ FB_test  <- FB_tbl %>%
 idx_train <- tk_index(FB_train)
 idx_test  <- tk_index(FB_test)
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 idx_test %>%
     tk_get_timeseries_signature() %>%
     ggplot(aes(x = index, y = diff)) +
@@ -114,7 +114,7 @@ idx_test %>%
          subtitle = "Combination of regularly spaced weekends and irregular holidays") +
     scale_y_continuous(limits = c(0, 2.2e6))
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 # Inspect weekdays: Removes weekends from future series
 idx_future_wdays <- idx_train %>% 
     tk_make_future_timeseries(n_future = 366, inspect_weekdays = TRUE, inspect_months = FALSE)
@@ -129,15 +129,15 @@ idx_future_wdays %>%
          subtitle = "Catches weekends, but not holidays") +
     scale_y_continuous(limits = c(0, 2.2e6))
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 # Type I Errors
 idx_test[!(idx_test %in% idx_future_wdays)]
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 # Type II Errors
 idx_future_wdays[!(idx_future_wdays %in% idx_test)]
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 # Inspect weekdays: Removes weekends from future series
 idx_future_wdays_and_months <- idx_train %>% 
     tk_make_future_timeseries(n_future = 366, inspect_weekdays = TRUE, inspect_months = TRUE)
@@ -152,15 +152,15 @@ idx_future_wdays_and_months %>%
          subtitle = "For most part catches missing weekends and some holidays, but some incorrect days are removed") +
     scale_y_continuous(limits = c(0, 2.2e6))
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 # Type I Errors
 idx_test[!(idx_test %in% idx_future_wdays_and_months)] 
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 # Type II Errors
 idx_future_wdays_and_months[!(idx_future_wdays_and_months %in% idx_test)] 
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 # Build vector of holidays in correct timeseries class using ymd()
 holidays <- c(
     "2016-01-01", "2016-01-18", "2016-02-15", "2016-03-25", "2016-05-30",

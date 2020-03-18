@@ -3,7 +3,7 @@
 
 # timetk
 
-<!-- # timetk <img src="man/figures/logo.png" width="147" height="170" align="right" /> -->
+<!-- <img src="man/figures/logo.png" width="147" height="170" align="right" />-->
 
 [![Travis build
 status](https://travis-ci.org/business-science/timetk.svg?branch=master)](https://travis-ci.org/business-science/timetk)
