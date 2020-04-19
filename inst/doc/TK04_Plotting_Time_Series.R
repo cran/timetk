@@ -1,0 +1,82 @@
+## ---- include = FALSE---------------------------------------------------------
+knitr::opts_chunk$set(
+  message = FALSE,
+  warning = FALSE,
+  fig.width = 8, 
+  fig.height = 4.5,
+  fig.align = 'center',
+  out.width='95%', 
+  dpi = 100,
+  collapse = TRUE,
+  comment = "#>"
+)
+
+## ----setup--------------------------------------------------------------------
+library(tidyverse)
+library(lubridate)
+library(timetk)
+
+# Setup for the plotly charts (# FALSE returns ggplots)
+interactive <- FALSE
+
+## -----------------------------------------------------------------------------
+taylor_30_min
+
+## -----------------------------------------------------------------------------
+taylor_30_min %>% 
+  plot_time_series(date, value, 
+                   .interactive = interactive,
+                   .plotly_slider = TRUE)
+
+## -----------------------------------------------------------------------------
+m4_daily %>% group_by(id)
+
+## -----------------------------------------------------------------------------
+m4_daily %>%
+  group_by(id) %>%
+  plot_time_series(date, value, 
+                   .facet_ncol = 2, .facet_scales = "free",
+                   .interactive = interactive)
+
+## ---- message=TRUE------------------------------------------------------------
+m4_daily %>%
+  group_by(id) %>%
+  plot_time_series(date, value, 
+                   .facet_ncol = 2, .facet_scales = "free", 
+                    # Note that D10 and D410 have less than 730 observations
+                   .smooth_period  = "2 year",
+                   # Shows the trend period selected
+                   .smooth_message = TRUE, 
+                   .interactive = interactive) 
+
+## -----------------------------------------------------------------------------
+m4_hourly %>% group_by(id)
+
+## -----------------------------------------------------------------------------
+m4_hourly %>%
+  plot_time_series(date, log(value),             # Apply a Log Transformation
+                   id,                           # Faceting (Group) 
+                   .color_var = week(date),      # Color applied to Week transformation
+                   # Facet formatting
+                   .facet_ncol = 2, 
+                   .facet_scales = "free", 
+                   .interactive = interactive)
+
+## -----------------------------------------------------------------------------
+taylor_30_min %>%
+  plot_time_series(date, value, 
+                   .color_var = month(date, label = TRUE),
+                   
+                   # Returns static ggplot
+                   .interactive = FALSE,  
+                   
+                   # Customization
+                   .title = "Taylor's MegaWatt Data",
+                   .x_lab = "Date (30-min intervals)",
+                   .y_lab = "Energy Demand (MW)",
+                   .color_lab = "Month") +
+  scale_y_continuous(labels = scales::comma_format())
+
+## ---- echo=FALSE--------------------------------------------------------------
+knitr::include_graphics("time_series_course.jpg")
+

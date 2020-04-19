@@ -1,10 +1,138 @@
+
+<!--
+__TODO:__
+
+
+SMALLER ITEMS:
+1. Outlier diagnostics
+2. Missing value diagnostics
+3. Weather signature
+4. tsibble integration
+
+- Weather
+    - Reim integration
+    - `tk_get_weather_signature()`, `tk_augment_weather_signature()`
+    - `step_weather_signature()`
+
+- Tests (Boooo)
+
+-->
+
+# timetk 1.0.0 
+
+__New Interactive Plotting Functions__:
+
+* `plot_time_series()` - __A workhorse time-series plotting function__ that generates interactive `plotly` plots, consolidates 20+ lines of `ggplot2` code, and scales well to many time series using dplyr groups. 
+* `plot_acf_diagnostics()` - Visualize the ACF, PACF, and any number of CCFs in one plot for Multiple Time Series. Interactive `plotly` by default. 
+* `plot_seasonal_diagnostics()` - Visualize Multiple Seasonality Features for One or More Time Series. Interactive `plotly` by default. 
+* `plot_stl_diagnostics()` - Visualize STL Decomposition Features for One or More Time Series.
+* `plot_time_series_cv_plan()` - Visualize the Time Series Cross Validation plan made with `time_series_cv()`.
+
+__New Time Series Data Wrangling__:
+
+* `summarise_by_time()` - A time-based variant of `dplyr::summarise()` for flexible summarization using common time-based criteria. 
+* `filter_by_time()` - A time-based variant of `dplyr::filter()` for flexible filtering by time-ranges.
+* `pad_by_time()` - Insert time series rows with regularly spaced timestamps.
+* `slidify()` - Make any function a rolling / sliding function. 
+* `between_time()` - A time-based variant of `dplyr::between()` for flexible time-range detection. 
+* `add_time()` - Add for time series index. Shifts an index by a `period`. 
+
+__New Recipe Functions:__
+
+Feature Generators:
+
+* `step_holiday_signature()` - New recipe step for adding 130 holiday features based on individual holidays, locales, and stock exchanges / business holidays. 
+* `step_fourier()` - New recipe step for adding fourier transforms for adding seasonal features to time series data
+* `step_roll_apply()` - New recipe step for adding rolling summary functions. Similar to `recipes::step_window()` but is more flexible by enabling application of any summary function. 
+* `step_smooth()` - New recipe step for adding Local Polynomial Regression (LOESS) for smoothing noisy time series
+* `step_diff()` - New recipe for adding multiple differenced columns. Similar to `recipes::step_lag()`.
+* `step_box_cox()` - New recipe for transforming predictors. Similar to `step_BoxCox()` with improvements for forecasting including "guerrero" method for lambda selection and handling of negative data. 
+* `step_impute_ts()` - New recipe for imputing a time series. 
+
+__New Rsample Functions__
+
+* `time_series_cv()` - Create `rsample` cross validation sets for time series. This function produces a sampling plan starting with the most recent time series observations, rolling backwards. 
+
+__New Vector Functions:__
+
+These functions are useful on their own inside of `mutate()` and power many of the new plotting and recipes functions.
+
+* `roll_apply_vec()` - Vectorized rolling apply function - wraps `slider::slide_vec()`
+* `smooth_vec()` - Vectorized smoothing function - Applies Local Polynomial Regression (LOESS)
+* `diff_vec()` and `diff_inv_vec()` - Vectorized differencing function. Pads `NA`'s by default (unlike `stats::diff`).
+* `lag_vec()` - Vectorized lag functions. Returns both lags and leads (negative lags) by adjusting the `.lag` argument. 
+* `box_cox_vec()`, `box_cox_inv_vec()`, & `auto_lambda()` - Vectorized Box Cox transformation. Leverages `forecast::BoxCox.lambda()` for automatic lambda selection. 
+* `fourier_vec()` - Vectorized Fourier Series calculation.
+* `impute_ts_vec()` - Vectorized imputation of missing values for time series. Leverages `forecast::na.interp()`.
+
+__New Augment Functions__:
+
+All of the functions are designed for scale. They respect `dplyr::group_by()`.
+
+* `tk_augment_holiday_signature()` - Add holiday features to a `data.frame` using only a time-series index.
+* `tk_augment_roll_apply()` - Add multiple columns of rolling window calculations to a `data.frame`.
+* `tk_augment_differences()` - Add multiple columns of differences to a `data.frame`. 
+* `tk_augment_lags()` - Add multiple columns of lags to a `data.frame`. 
+* `tk_augment_fourier()` - Add multiple columns of fourier series to a `data.frame`.
+
+
+__New Make Functions__:
+
+Make date and date-time sequences between start and end dates.
+
+* `tk_make_timeseries()` -  Super flexible function for creating daily and sub-daily time series. 
+* `tk_make_weekday_sequence()` - Weekday sequence that accounts for both __stripping weekends and holidays__
+* `tk_make_holiday_sequence()` - Makes a sequence of dates corresponding to business holidays in calendars from `timeDate` (common non-working days)
+* `tk_make_weekend_sequence()` - Weekday sequence of dates for Saturday and Sunday (common non-working days)
+
+__New Get Functions__:
+
+* `tk_get_holiday_signature()` - Get 100+ holiday features using only a time-series index.
+* `tk_get_frequency()` and `tk_get_trend()` - Automatic frequency and trend calculation from a time series index. 
+
+
+__New Diagnostic / Data Processing Functions__
+
+* `tk_summary_diagnostics()`  - Group-wise time series summary. 
+* `tk_acf_diagnostics()` - The data preparation function for `plot_acf_diagnostics()`
+* `tk_seasonal_diagnostics()` - The data preparation function for `plot_seasonal_diagnostics()`
+* `tk_stl_diagnostics()` - Group-wise STL Decomposition (Season, Trend, Remainder). Data prep for `plot_stl_diagnostics()`.
+* `tk_time_series_cv_plan` - The data preparation function for `plot_time_series_cv_plan()`
+
+
+__New Datasets__
+
+- __M4 Competition__ - Sample "economic" datasets from hourly, daily, weekly, monthly, quarterly, and yearly.
+- __Walmart Recruiting Retail Sales Forecasting Competition__ - Sample of 7 retail time series
+- __Web Traffic Forecasting (Wikipedia) Competition__ - Sample of 10 website time series
+- __Taylor's Energy Demand__ - Single time series with 30-minute interval of energy demand
+- __UCI Bike Sharing Daily__ - A time series consisting of Capital Bikesharing Transaction Counts and related time-based features. 
+
+
+__Improvements:__
+* `tk_make_future_timeseries()` - Now accepts `n_future` as a time-based phrase like "12 seconds" or "1 year".
+
+__Bug Fixes:__
+
+* [Don't set timezone on date](https://github.com/business-science/timetk/pull/32) - Accommodate recent changes to `lubridate::tz<-` which now returns POSIXct when used Date objects. Fixed in PR32 by @vspinu. 
+
+__Potential Breaking Changes:__
+
+* `tk_augment_timeseries_signature()` - Changed from `data` to `.data` to prevent name collisions when piping. 
+
+
+
+
 # timetk 0.1.3 
 
-__New Feature:__
-* `recipes` Integration - New `step_timeseries_signature()` for adding date and date-time features.
+__New Features:__
+
+* `recipes` Integration - Ability to apply ___time series feature engineering___ in the `tidymodels` machine learning workflow. 
+    * `step_timeseries_signature()` - New `step_timeseries_signature()` for adding date and date-time features.
 * New Vignette - _"Time Series Machine Learning"_ (previously forecasting using the time series signature)
 
 __Bug Fixes:__
+
 * `xts::indexTZ` is deprecated. Use `tzone` instead.
 * Replace `arrange_` with `arrange`.
 * Fix failing tests due to `tidyquant` 1.0.0 upagrade (single stocks now return an extra symbol column).

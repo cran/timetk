@@ -1,0 +1,122 @@
+---
+title: "Plotting Seasonality and Correlation"
+author: "Matt Dancho"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 2
+vignette: >
+  %\VignetteIndexEntry{Plotting_Seasonality_and_Correlation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  message = FALSE,
+  warning = FALSE,
+  fig.width = 8, 
+  fig.height = 4.5,
+  fig.align = 'center',
+  out.width='95%', 
+  dpi = 100,
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+> timetk: A toolkit for time series analysis in R
+
+This tutorial focuses on 3 new functions for visualizing time series diagnostics:
+
+- ACF Diagnostics: `plot_acf_diagnostics()`
+- Seasonality Diagnostics: `plot_seasonal_diagnostics()`
+- STL Diagnostics: `plot_stl_diagnostics()`
+
+```{r setup}
+library(tidyverse)
+library(timetk)
+
+# Setup for the plotly charts (# FALSE returns ggplots)
+interactive <- FALSE
+```
+
+# Correlation Plots
+
+## Grouped ACF Diagnostics
+
+```{r, fig.height=6}
+m4_hourly %>%
+    group_by(id) %>%
+    plot_acf_diagnostics(
+        date, value,               # ACF & PACF
+        .lags = 0:(24*7),          # 7-Days of hourly lags
+        .interactive = interactive
+    )
+```
+
+## Grouped CCF Plots
+
+```{r, fig.height=8}
+walmart_sales_weekly %>%
+    select(id, Date, Weekly_Sales, Temperature, Fuel_Price) %>%
+    group_by(id) %>%
+    plot_acf_diagnostics(
+        Date, Weekly_Sales,        # ACF & PACF
+        Temperature, Fuel_Price,   # CCFs
+        .lags        = 0:(4*3),    # 3 months of weekly lags
+        .interactive = interactive
+    )
+```
+
+# Seasonality
+
+## Seasonal Visualizations
+
+```{r, fig.height=8}
+taylor_30_min %>%
+    plot_seasonal_diagnostics(date, value, .interactive = interactive)
+```
+
+## Grouped Seasonal Visualizations
+
+```{r, fig.height=8}
+m4_hourly %>%
+    group_by(id) %>%
+    plot_seasonal_diagnostics(date, value, .interactive = interactive)
+```
+
+
+# STL Diagnostics
+
+```{r, fig.height=8}
+m4_hourly %>%
+    group_by(id) %>%
+    plot_stl_diagnostics(
+        date, value,
+        .frequency = "auto", .trend = "auto",
+        .feature_set = c("observed", "season", "trend", "remainder"),
+        .interactive = interactive)
+```
+
+# Learning More
+
+If you are interested in learning from my advanced __Time Series Analysis & Forecasting Course__, then [join my waitlist](https://mailchi.mp/business-science/time-series-forecasting-course-coming-soon). The course is coming soon. 
+
+```{r, echo=FALSE}
+knitr::include_graphics("time_series_course.jpg")
+```
+
+You will learn:
+
+- Time Series Preprocessing, Noise Reduction, & Anomaly Detection
+- Feature engineering using lagged variables & external regressors
+- Hyperparameter Tuning
+- Time series cross-validation
+- Ensembling Multiple Machine Learning & Univariate Modeling Techniques (Competition Winner)
+- NEW - Deep Learning with RNNs (Competition Winner)
+- and more.
+
+<p class="text-center" style="font-size:30px;">
+<a href="https://mailchi.mp/business-science/time-series-forecasting-course-coming-soon">Signup for the Time Series Course waitlist</a>
+</p>

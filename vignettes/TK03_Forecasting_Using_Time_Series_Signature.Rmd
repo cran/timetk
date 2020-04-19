@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
     fig.height = 4.5,
     fig.align = 'center',
     out.width='95%', 
-    dpi = 200
+    dpi = 100
 )
 
 # devtools::load_all() # Travis CI fails on load_all()
@@ -40,7 +40,6 @@ library(workflows)
 library(parsnip)
 library(recipes)
 library(yardstick)
-library(glmnet)
 library(tidyverse)
 library(tidyquant)
 library(timetk)
@@ -48,19 +47,18 @@ library(timetk)
 
 # Data
 
-We'll be using the [Bike Sharing Dataset](https://archive.ics.uci.edu/ml/datasets/bike+sharing+dataset) from the UCI Machine Learning Repository. Download the data and select the "day.csv" file which is aggregated to daily periodicity.
+We'll be using the [Bike Sharing Dataset](https://archive.ics.uci.edu/ml/datasets/bike+sharing+dataset) from the UCI Machine Learning Repository.
 
 _Source: Fanaee-T, Hadi, and Gama, Joao, 'Event labeling combining ensemble detectors and background knowledge', Progress in Artificial Intelligence (2013): pp. 1-15, Springer Berlin Heidelberg_
 
 ```{r}
 # Read data
-bikes <- read_csv("day.csv")
-
-# Select date and count
-bikes_tbl <- bikes %>%
+bikes_tbl <- bike_sharing_daily %>%
     select(dteday, cnt) %>%
     rename(date  = dteday,
            value = cnt)
+
+bikes_tbl
 ```
 
 A visualization will help understand how we plan to tackle the problem of forecasting the data. We'll split the data into two regions: a training region and a testing region. 
@@ -128,8 +126,7 @@ recipe_spec_final <- recipe_spec_timeseries %>%
     step_rm(contains("iso"), contains("minute"), contains("hour"),
             contains("am.pm"), contains("xts")) %>%
     step_normalize(contains("index.num"), date_year) %>%
-    step_dummy(contains("lbl"), one_hot = TRUE) %>%
-    step_ns(date_index.num, deg_free = 3)
+    step_dummy(contains("lbl"), one_hot = TRUE) 
 
 bake(prep(recipe_spec_final), new_data = train_tbl)
 ```
@@ -140,8 +137,8 @@ bake(prep(recipe_spec_final), new_data = train_tbl)
 Next, let's create a model specification. We'll use a `glmnet`. 
 
 ```{r}
-model_spec_glmnet <- linear_reg(mode = "regression", penalty = 0.001, mixture = 0.5) %>%
-    set_engine("glmnet")
+model_spec_glmnet <- linear_reg(mode = "regression") %>%
+    set_engine("lm")
 ```
 
 ## Workflow
@@ -224,7 +221,7 @@ prediction_tbl %>%
     scale_y_continuous(limits = c(-5000, 5000))
 ```
 
-At this point you might go back to the model and try tweaking features using interactions or polynomial terms, adding other features that may be known in the future (e.g. temperature of day can be forecasted relatively accurately within 7 days), or try a completely different modeling technique with the hope of better predictions on the test set. Once you feel that your model is optimized, move on the final step of forecasting. 
+This is certainly not the best model we can come up with, but it will do for a quick tutorial. I have a ton of improvements that can be made, and I teach these expert techniques. If you are interested in learning from my advanced [__Time Series Analysis & Forecasting Course__](https://mailchi.mp/business-science/time-series-forecasting-course-coming-soon), then join my waitlist. The course is coming soon. 
 
 # Forecasting Future Data
 
@@ -341,7 +338,7 @@ bikes_tbl %>%
 
  
 
-
+<!--
 # Parting Thoughts
 
 Forecasting using the time series signature can be very accurate especially when time-based patterns are present in the underlying data. As with most machine learning applications, the prediction is only as good as the patterns in the data. Forecasting using this approach may _not_ be suitable when patterns are not present or when the future is highly uncertain (i.e. past is not a suitable predictor of future performance). However, in may situations the time series signature can provide an accurate forecast.
@@ -358,5 +355,28 @@ __Last, a few points on the modeling process - The following modeling steps are 
 - and more. 
 
 These will be covered in my upcoming [__Advanced Time Series Course (Register Here)__](https://mailchi.mp/business-science/time-series-forecasting-course-coming-soon). 
+-->
+
+# Learning More
+
+If you are interested in learning from my advanced [__Time Series Analysis & Forecasting Course__](https://mailchi.mp/business-science/time-series-forecasting-course-coming-soon), then join my waitlist. The course is coming soon. 
+
+```{r, echo=FALSE}
+knitr::include_graphics("time_series_course.jpg")
+```
+
+You will learn:
+
+- Time Series Preprocessing, Noise Reduction, & Anomaly Detection
+- Feature engineering using lagged variables & external regressors
+- Hyperparameter Tuning
+- Time series cross-validation
+- Ensembling Multiple Machine Learning & Univariate Modeling Techniques (Competition Winner)
+- NEW - Deep Learning with RNNs (Competition Winner)
+- and more.
+
+<p class="text-center" style="font-size:30px;">
+<a href="https://mailchi.mp/business-science/time-series-forecasting-course-coming-soon">Signup for the Time Series Course waitlist</a>
+</p>
 
 

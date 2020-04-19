@@ -33,11 +33,18 @@
 #'  (the selectors or variables selected), `value` (the feature
 #'  names).
 #'
-#' @keywords datagen
-#' @concept preprocessing
-#' @concept model_specification
-#' @concept variable_encodings
-#' @concept dates
+#' @seealso
+#'  Time Series Analysis:
+#'  - Engineered Features: [step_timeseries_signature()], [step_holiday_signature()], [step_fourier()]
+#'  - Diffs & Lags [step_diff()], [recipes::step_lag()]
+#'  - Smoothing: [step_roll_apply()], [step_smooth()]
+#'  - Variance Reduction: [step_box_cox()]
+#'  - Imputation: [step_impute_ts()]
+#'
+#'  Main Recipe Functions:
+#'  - [recipes::recipe()]
+#'  - [recipes::prep.recipe()]
+#'  - [recipes::bake.recipe()]
 #'
 #'
 #' @details
@@ -81,10 +88,6 @@
 #' tidy(rec_obj)
 #' tidy(rec_obj, number = 1)
 #'
-#' @seealso [recipes::step_holiday()] [recipes::step_date()]
-#'   [recipes::step_rm()]
-#'   [recipes::recipe()] [recipes::prep.recipe()]
-#'   [recipes::bake.recipe()]
 #'
 #'
 #' @importFrom recipes rand_id
@@ -225,7 +228,7 @@ tidy.step_timeseries_signature <- function(x, ...) {
         dplyr::select(-index, -diff) %>%
         colnames()
 
-    if (is_trained(x)) {
+    if (recipes::is_trained(x)) {
         res <- expand.grid(
             terms = x$columns,
             value = features

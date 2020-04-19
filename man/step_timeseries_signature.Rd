@@ -101,15 +101,23 @@ bake(prep(rec_obj), FB_tbl)
 tidy(rec_obj)
 tidy(rec_obj, number = 1)
 
+
+
 }
 \seealso{
-\code{\link[recipes:step_holiday]{recipes::step_holiday()}} \code{\link[recipes:step_date]{recipes::step_date()}}
-\code{\link[recipes:step_rm]{recipes::step_rm()}}
-\code{\link[recipes:recipe]{recipes::recipe()}} \code{\link[recipes:prep.recipe]{recipes::prep.recipe()}}
-\code{\link[recipes:bake.recipe]{recipes::bake.recipe()}}
+Time Series Analysis:
+\itemize{
+\item Engineered Features: \code{\link[=step_timeseries_signature]{step_timeseries_signature()}}, \code{\link[=step_holiday_signature]{step_holiday_signature()}}, \code{\link[=step_fourier]{step_fourier()}}
+\item Diffs & Lags \code{\link[=step_diff]{step_diff()}}, \code{\link[recipes:step_lag]{recipes::step_lag()}}
+\item Smoothing: \code{\link[=step_roll_apply]{step_roll_apply()}}, \code{\link[=step_smooth]{step_smooth()}}
+\item Variance Reduction: \code{\link[=step_box_cox]{step_box_cox()}}
+\item Imputation: \code{\link[=step_impute_ts]{step_impute_ts()}}
 }
-\concept{dates}
-\concept{model_specification}
-\concept{preprocessing}
-\concept{variable_encodings}
-\keyword{datagen}
+
+Main Recipe Functions:
+\itemize{
+\item \code{\link[recipes:recipe]{recipes::recipe()}}
+\item \code{\link[recipes:prep.recipe]{recipes::prep.recipe()}}
+\item \code{\link[recipes:bake.recipe]{recipes::bake.recipe()}}
+}
+}

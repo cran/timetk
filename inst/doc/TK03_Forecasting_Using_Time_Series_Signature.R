@@ -6,7 +6,7 @@ knitr::opts_chunk$set(
     fig.height = 4.5,
     fig.align = 'center',
     out.width='95%', 
-    dpi = 200
+    dpi = 100
 )
 
 # devtools::load_all() # Travis CI fails on load_all()
@@ -16,20 +16,18 @@ library(workflows)
 library(parsnip)
 library(recipes)
 library(yardstick)
-library(glmnet)
 library(tidyverse)
 library(tidyquant)
 library(timetk)
 
 ## -----------------------------------------------------------------------------
 # Read data
-bikes <- read_csv("day.csv")
-
-# Select date and count
-bikes_tbl <- bikes %>%
+bikes_tbl <- bike_sharing_daily %>%
     select(dteday, cnt) %>%
     rename(date  = dteday,
            value = cnt)
+
+bikes_tbl
 
 ## -----------------------------------------------------------------------------
 # Visualize data and training/testing regions
@@ -70,14 +68,13 @@ recipe_spec_final <- recipe_spec_timeseries %>%
     step_rm(contains("iso"), contains("minute"), contains("hour"),
             contains("am.pm"), contains("xts")) %>%
     step_normalize(contains("index.num"), date_year) %>%
-    step_dummy(contains("lbl"), one_hot = TRUE) %>%
-    step_ns(date_index.num, deg_free = 3)
+    step_dummy(contains("lbl"), one_hot = TRUE) 
 
 bake(prep(recipe_spec_final), new_data = train_tbl)
 
 ## -----------------------------------------------------------------------------
-model_spec_glmnet <- linear_reg(mode = "regression", penalty = 0.001, mixture = 0.5) %>%
-    set_engine("glmnet")
+model_spec_glmnet <- linear_reg(mode = "regression") %>%
+    set_engine("lm")
 
 ## -----------------------------------------------------------------------------
 workflow_glmnet <- workflow() %>%
@@ -210,4 +207,7 @@ bikes_tbl %>%
                 method = 'loess', color = "white") + 
     labs(title = "Bikes Sharing Dataset: 6-Month Forecast with Prediction Intervals", x = "") +
     theme_tq()
+
+## ---- echo=FALSE--------------------------------------------------------------
+knitr::include_graphics("time_series_course.jpg")
 
