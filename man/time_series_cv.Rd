@@ -6,11 +6,12 @@
 \usage{
 time_series_cv(
   data,
+  date_var = NULL,
   initial = 5,
   assess = 1,
-  cumulative = TRUE,
-  skip = 0,
+  skip = 1,
   lag = 0,
+  cumulative = FALSE,
   slice_limit = n(),
   ...
 )
@@ -18,13 +19,12 @@ time_series_cv(
 \arguments{
 \item{data}{A data frame.}
 
+\item{date_var}{A date or date-time variable.}
+
 \item{initial}{The number of samples used for analysis/modeling in the
 initial resample.}
 
 \item{assess}{The number of samples used for each assessment resample.}
-
-\item{cumulative}{A logical. Should the analysis resample grow beyond the
-size specified by \code{initial} at each resample?.}
 
 \item{skip}{A integer indicating how many (if any) \emph{additional} resamples
 to skip to thin the total amount of data points in the analysis resample.
@@ -33,6 +33,9 @@ See the example below.}
 \item{lag}{A value to include an lag between the assessment
 and analysis set. This is useful if lagged predictors will be used
 during training and testing.}
+
+\item{cumulative}{A logical. Should the analysis resample grow beyond the
+size specified by \code{initial} at each resample?.}
 
 \item{slice_limit}{The number of slices to return. Set to \code{dplyr::n()},
 which returns the maximum number of slices.}
@@ -53,11 +56,35 @@ is similar to \code{rsample::rolling_origin()}, but places the focus
 of the cross validation on the most recent time series data.
 }
 \details{
-\strong{Intial (Training Set) and Assess (Testing Set)}
+\strong{Time-Based Specification}
+
+the
+\code{initial}, \code{assess}, \code{skip}, and \code{lag} variables can be specified as:
+\itemize{
+\item Numeric: \code{initial = 24}
+\item Time-Based Phrases: \code{initial = "2 years"}, if the \code{data} contains
+a \code{date_var} (date or datetime)
+}
+
+\strong{Initial (Training Set) and Assess (Testing Set)}
 
 The main options, \code{initial} and \code{assess}, control the number of
 data points from the original data that are in the analysis (training set)
 and the assessment (testing set), respectively.
+
+\strong{Skip}
+
+\code{skip} enables the function to not use every data point in the resamples.
+When \code{skip = 1}, the resampling data sets will increment by one position.
+
+Example: Suppose that the rows of a data set are consecutive days. Using \code{skip = 7}
+will make the analysis data set operate on \emph{weeks} instead of days. The
+assessment set size is not affected by this option.
+
+\strong{Lag}
+
+The Lag parameter creates an overlap between the Testing set. This is needed
+when lagged predictors are used.
 
 \strong{Cumulative vs Sliding Window}
 
@@ -69,19 +96,6 @@ static.
 When \code{cumulative = FALSE}, the \code{initial} parameter fixes the analysis (training)
 set and resampling occurs over a fixed window.
 
-\strong{Skip}
-
-\code{skip} enables the function to not use every data point in the resamples.
-When \code{skip = 0}, the resampling data sets will increment by one position.
-Suppose that the rows of a data set are consecutive days. Using \code{skip = 6}
-will make the analysis data set operate on \emph{weeks} instead of days. The
-assessment set size is not affected by this option.
-
-\strong{Lag}
-
-The Lag parameter creates an overlap between the Testing set. This is needed
-when lagged predictors are used.
-
 \strong{Slice Limit}
 
 This controls the number of slices. If \code{slice_limit = 5}, only the most recent
@@ -89,28 +103,30 @@ This controls the number of slices. If \code{slice_limit = 5}, only the most rec
 }
 \examples{
 library(tidyverse)
-library(tidyquant)
-library(rsample)
 library(timetk)
 
-FB_tbl <- FANG \%>\%
-    filter(symbol == "FB") \%>\%
-    select(symbol, date, adjusted)
+# DATA ----
+m750 <- m4_monthly \%>\% filter(id == "M750")
 
-resample_spec <- time_series_cv(
-    FB_tbl,
-    initial = 150, assess = 50, skip = 50,
-    cumulative = FALSE,
-    lag = 30,
-    slice_limit = 6)
+m750 \%>\% plot_time_series(date, value)
 
-resample_spec \%>\%
-    plot_time_series_cv_plan(
-        date, adjusted,
-        .facet_ncol = 2,
-        .line_alpha = 0.5,
-        .interactive = FALSE
-    )
+# RESAMPLE SPEC ----
+resample_spec <- time_series_cv(data = m750,
+                                initial     = "6 years",
+                                assess      = "24 months",
+                                skip        = "24 months",
+                                cumulative  = FALSE,
+                                slice_limit = 3)
+
+resample_spec
+
+# VISUALIZE CV PLAN ----
+
+# Select date and value columns from the tscv diagnostic tool
+resample_spec \%>\% tk_time_series_cv_plan()
+
+# Plot the date and value columns to see the CV Plan
+resample_spec \%>\% plot_time_series_cv_plan(date, value, .interactive = FALSE)
 
 }
 \seealso{

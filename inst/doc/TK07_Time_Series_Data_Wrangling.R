@@ -62,7 +62,7 @@ FANG %>%
 FANG %>%
   group_by(symbol) %>%
   pad_by_time(date, .by = "hour") %>%
-  mutate_at(vars(open:adjusted), .funs = impute_ts_vec, period = 1) %>%
+  mutate_at(vars(open:adjusted), .funs = ts_impute_vec, period = 1) %>%
   filter_by_time(date, "start", FIRST(date) %+time% "1 month") %>%
   plot_time_series(date, adjusted, .facet_ncol = 2, .interactive = FALSE) 
 
@@ -86,8 +86,8 @@ FANG %>%
   select(symbol, date, adjusted) %>%
   group_by(symbol) %>%
   # Apply roll apply Function
-  mutate(rolling_avg_30 = roll_apply_vec(adjusted,  ~ AVERAGE(.), 
-                                         .period = 30, .partial = TRUE))
+  mutate(rolling_avg_30 = slidify_vec(adjusted,  ~ AVERAGE(.), 
+                                      .period = 30, .partial = TRUE))
 
 ## -----------------------------------------------------------------------------
 # Rolling regressions are easy to implement using `.unlist = FALSE`

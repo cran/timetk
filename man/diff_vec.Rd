@@ -5,7 +5,14 @@
 \alias{diff_inv_vec}
 \title{Differencing Transformation}
 \usage{
-diff_vec(x, lag = 1, difference = 1, log = FALSE)
+diff_vec(
+  x,
+  lag = 1,
+  difference = 1,
+  log = FALSE,
+  initial_values = NULL,
+  silent = FALSE
+)
 
 diff_inv_vec(x, lag = 1, difference = 1, log = FALSE, initial_values = NULL)
 }
@@ -23,8 +30,12 @@ diff_inv_vec(x, lag = 1, difference = 1, log = FALSE, initial_values = NULL)
 \item{log}{If log differences should be calculated.
 \emph{Note that difference inversion of a log-difference is approximate.}}
 
-\item{initial_values}{A numeric vector of the initial values, which are used for difference inversion.
+\item{initial_values}{Only used in the \code{diff_vec_inv()} operation.
+A numeric vector of the initial values, which are used to invert differences.
 This vector is the original values that are the length of the \code{NA} missing differences.}
+
+\item{silent}{Whether or not to report the initial values used to invert the difference
+as a message.}
 }
 \value{
 A numeric vector
@@ -62,15 +73,20 @@ where \code{diff_vec(difference = 1, log = TRUE) \%>\% exp()} is approximately \
 library(dplyr)
 library(timetk)
 
+# --- USAGE ----
+
+diff_vec(1:10, lag = 2, difference = 2) \%>\%
+    diff_inv_vec(lag = 2, difference = 2, initial_values = 1:4)
+
 # --- VECTOR ----
 
-# Change
+# Get Change
 1:10 \%>\% diff_vec()
 
-# Acceleration
+# Get Acceleration
 1:10 \%>\% diff_vec(difference = 2)
 
-# Approximate rate of change
+# Get approximate rate of change
 1:10 \%>\% diff_vec(log = TRUE) \%>\% exp() - 1
 
 
@@ -103,9 +119,9 @@ Additional Vector Functions:
 \item Box Cox Transformation: \code{\link[=box_cox_vec]{box_cox_vec()}}
 \item Lag Transformation: \code{\link[=lag_vec]{lag_vec()}}
 \item Differencing Transformation: \code{\link[=diff_vec]{diff_vec()}}
-\item Rolling Window Transformation: \code{\link[=roll_apply_vec]{roll_apply_vec()}}
+\item Rolling Window Transformation: \code{\link[=slidify_vec]{slidify_vec()}}
 \item Loess Smoothing Transformation: \code{\link[=smooth_vec]{smooth_vec()}}
 \item Fourier Series: \code{\link[=fourier_vec]{fourier_vec()}}
-\item Missing Value Imputation for Time Series: \code{\link[=impute_ts_vec]{impute_ts_vec()}}
+\item Missing Value Imputation for Time Series: \code{\link[=ts_impute_vec]{ts_impute_vec()}}, \code{\link[=ts_clean_vec]{ts_clean_vec()}}
 }
 }

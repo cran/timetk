@@ -12,7 +12,7 @@
 
 <meta name="author" content="Matt Dancho" />
 
-<meta name="date" content="2020-04-19" />
+<meta name="date" content="2020-05-30" />
 
 <title>Time Series Machine Learning</title>
 
@@ -303,7 +303,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Time Series Machine Learning</h1>
 <h4 class="author">Matt Dancho</h4>
-<h4 class="date">2020-04-19</h4>
+<h4 class="date">2020-05-30</h4>
 
 
 <div id="TOC">
@@ -483,11 +483,11 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <span id="cb14-3"><a href="#cb14-3"></a><span class="st">    </span><span class="kw">add_model</span>(model_spec_glmnet)</span>
 <span id="cb14-4"><a href="#cb14-4"></a></span>
 <span id="cb14-5"><a href="#cb14-5"></a>workflow_glmnet</span></code></pre></div>
-<pre><code>## ══ Workflow ═════════════════════════════════════════════════════════════════════════════════════════
+<pre><code>## ══ Workflow ═════════════════════════════════════════════════════════════════════════════════════════════════════════
 ## Preprocessor: Recipe
 ## Model: linear_reg()
 ## 
-## ── Preprocessor ─────────────────────────────────────────────────────────────────────────────────────
+## ── Preprocessor ─────────────────────────────────────────────────────────────────────────────────────────────────────
 ## 5 Recipe Steps
 ## 
 ## ● step_timeseries_signature()
@@ -496,7 +496,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 ## ● step_normalize()
 ## ● step_dummy()
 ## 
-## ── Model ────────────────────────────────────────────────────────────────────────────────────────────
+## ── Model ────────────────────────────────────────────────────────────────────────────────────────────────────────────
 ## Linear Regression Model Specification (regression)
 ## 
 ## Computational engine: lm</code></pre>
@@ -591,7 +591,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 ##          &lt;dbl&gt;   &lt;dbl&gt;       &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;        &lt;dbl&gt;
 ## 1        86400   86400       86400     86400   86400        86400</code></pre>
 <p>From the summary, we know that the data is 100% regular because the median and mean differences are 86400 seconds or 1 day. We don’t need to do any special inspections when we use <code>tk_make_future_timeseries()</code>. If the data was irregular, meaning weekends or holidays were excluded, you’d want to account for this. Otherwise your forecast would be inaccurate.</p>
-<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1"></a>idx_future &lt;-<span class="st"> </span>idx <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">tk_make_future_timeseries</span>(<span class="dt">n_future =</span> <span class="dv">180</span>)</span>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1"></a>idx_future &lt;-<span class="st"> </span>idx <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">tk_make_future_timeseries</span>(<span class="dt">length_out =</span> <span class="dv">180</span>)</span>
 <span id="cb28-2"><a href="#cb28-2"></a></span>
 <span id="cb28-3"><a href="#cb28-3"></a>future_tbl &lt;-<span class="st"> </span><span class="kw">tibble</span>(<span class="dt">date =</span> idx_future) </span>
 <span id="cb28-4"><a href="#cb28-4"></a></span>

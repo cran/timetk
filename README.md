@@ -3,7 +3,7 @@
 
 # timetk
 
-<!-- <img src="man/figures/logo.png" width="147" height="170" align="right" /> -->
+<!-- <img src="man/figures/logo.png" width="147" height="170" align="right" />-->
 
 [![Travis build
 status](https://travis-ci.org/business-science/timetk.svg?branch=master)](https://travis-ci.org/business-science/timetk)
@@ -48,6 +48,9 @@ frames or tibbles).
 | [**Visualization**](https://business-science.github.io/timetk/articles/TK04_Plotting_Time_Series.html)                              |                                                      |                                                     |                                                   |                                                              |
 | Interactive Plots (plotly)                                                                                                          | ✅                                                    | :x:                                                 | :x:                                               | :x:                                                          |
 | Static Plots (ggplot)                                                                                                               | ✅                                                    | :x:                                                 | ✅                                                 | :x:                                                          |
+| [Time Series](https://business-science.github.io/timetk/articles/TK04_Plotting_Time_Series.html)                                    | ✅                                                    | :x:                                                 | ✅                                                 | :x:                                                          |
+| [Correlation, Seasonality](https://business-science.github.io/timetk/articles/TK05_Plotting_Seasonality_and_Correlation.html)       | ✅                                                    | :x:                                                 | ✅                                                 | :x:                                                          |
+| [Anomaly Detection](https://business-science.github.io/timetk/articles/TK08_Automatic_Anomaly_Detection.html)                       | ✅                                                    | :x:                                                 | :x:                                               | :x:                                                          |
 | [**Data Wrangling**](https://business-science.github.io/timetk/articles/TK07_Time_Series_Data_Wrangling.html)                       |                                                      |                                                     |                                                   |                                                              |
 | Time-Based Summarization                                                                                                            | ✅                                                    | :x:                                                 | :x:                                               | ✅                                                            |
 | Time-Based Filtering                                                                                                                | ✅                                                    | :x:                                                 | :x:                                               | ✅                                                            |
@@ -60,6 +63,7 @@ frames or tibbles).
 | Holiday Feature Engineering                                                                                                         | ✅                                                    | :x:                                                 | :x:                                               | :x:                                                          |
 | Fourier Series                                                                                                                      | ✅                                                    | :x:                                                 | :x:                                               | :x:                                                          |
 | Smoothing & Rolling                                                                                                                 | ✅                                                    | :x:                                                 | :x:                                               | :x:                                                          |
+| Padding                                                                                                                             | ✅                                                    | :x:                                                 | :x:                                               | :x:                                                          |
 | Imputation                                                                                                                          | ✅                                                    | :x:                                                 | :x:                                               | :x:                                                          |
 | **Cross Validation (rsample)**                                                                                                      |                                                      |                                                     |                                                   |                                                              |
 | [Time Series Cross Validation](https://business-science.github.io/timetk/reference/time_series_cv.html)                             | ✅                                                    | :x:                                                 | :x:                                               | :x:                                                          |
@@ -84,6 +88,16 @@ taylor_30_min %>%
 
 ![](man/figures/README-unnamed-chunk-3-1.png)<!-- -->
 
+Visualize anomalies…
+
+``` r
+walmart_sales_weekly %>%
+    plot_anomaly_diagnostics(Date, Weekly_Sales, Store, Dept, 
+                             .facet_ncol = 3, .interactive = FALSE)
+```
+
+![](man/figures/README-unnamed-chunk-4-1.png)<!-- -->
+
 Make a seasonality plot…
 
 ``` r
@@ -91,17 +105,17 @@ taylor_30_min %>%
     plot_seasonal_diagnostics(date, value, .interactive = FALSE)
 ```
 
-![](man/figures/README-unnamed-chunk-4-1.png)<!-- -->
+![](man/figures/README-unnamed-chunk-5-1.png)<!-- -->
 
 Inspect autocorrelation, partial autocorrelation (and cross correlations
 too)…
 
 ``` r
 taylor_30_min %>%
-    plot_acf_diagnostics(date, value, .lags = 0:(48*7), .interactive = FALSE)
+    plot_acf_diagnostics(date, value, .lags = "1 week", .interactive = FALSE)
 ```
 
-![](man/figures/README-unnamed-chunk-5-1.png)<!-- -->
+![](man/figures/README-unnamed-chunk-6-1.png)<!-- -->
 
 ## Installation
 
@@ -142,17 +156,20 @@ series packages.
     Possibly my favorite R package of all time. It’s based on `ts`, and
     it’s predecessor is the `tidyverts` (`fable`, `tsibble`, `feasts`,
     and `fabletools`).
-      - The `impute_ts_vec()` function for low-level vectorized
+      - The `ts_impute_vec()` function for low-level vectorized
         imputation using STL + Linear Interpolation uses `na.interp()`
+        under the hood.
+      - The `ts_clean_vec()` function for low-level vectorized
+        imputation using STL + Linear Interpolation uses `tsclean()`
         under the hood.
       - Box Cox transformation `auto_lambda()` uses `BoxCox.Lambda()`.  
   - [tibbletime
     (retired)](https://business-science.github.io/tibbletime/): While
     `timetk` does not import `tibbletime`, it uses much of the
     innovative functionality to interpret time-based phrases:
-      - `tk_make_timeseries()` - Extends `seq.Date()` and
-        `seq.POSIXct()` using a simple phase like “2012-02” to populate
-        the entire time series from start to finish in February 2012.
+      - `tk_make_timeseries()` - Extends `seq.Date()` and `seq.POSIXt()`
+        using a simple phase like “2012-02” to populate the entire time
+        series from start to finish in February 2012.
       - `filter_by_time()`, `between_time()` - Uses innovative endpoint
         detection from phrases like “2012”
       - `slidify()` is basically `rollify()` using `slider` (see below).
@@ -160,11 +177,13 @@ series packages.
     package that provides a `purrr`-syntax for complex rolling (sliding)
     calculations.
       - `slidify()` uses `slider::pslide` under the hood.
-      - `roll_apply_vec()` uses `slider::slide_vec()` for simple
-        vectorized rolls (slides).
+      - `slidify_vec()` uses `slider::slide_vec()` for simple vectorized
+        rolls (slides).
   - [padr](https://edwinth.github.io/padr/): Used for padding time
-    series from low frequency to high frequency and filling in gaps. The
-    `pad_by_time()` function is a wrapper for `padr::pad()`.
+    series from low frequency to high frequency and filling in gaps.
+      - The `pad_by_time()` function is a wrapper for `padr::pad()`.
+      - See the `step_ts_pad()` to apply padding as a preprocessing
+        recipe\!
   - [TSstudio](https://github.com/RamiKrispin/TSstudio): This is the
     best interactive time series visualization tool out there. It
     leverages the `ts` system, which is the same system the `forecast` R

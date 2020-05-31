@@ -9,7 +9,7 @@ plot_acf_diagnostics(
   .date_var,
   .value,
   ...,
-  .lags = 0:20,
+  .lags = 1000,
   .facet_ncol = 1,
   .facet_scales = "fixed",
   .line_color = "#2c3e50",
@@ -18,6 +18,8 @@ plot_acf_diagnostics(
   .point_color = "#2c3e50",
   .point_size = 1,
   .point_alpha = 1,
+  .x_intercept = NULL,
+  .x_intercept_color = "#E31A1C",
   .hline_color = "#2c3e50",
   .title = "Lag Diagnostics",
   .x_lab = "Lag",
@@ -38,7 +40,7 @@ performed.}
 \item{...}{Additional features to perform Lag Cross Correlations (CCFs)
 versus the \code{.value}. Useful for evaluating external lagged regressors.}
 
-\item{.lags}{A seqence of one or more lags to evaluate.}
+\item{.lags}{A sequence of one or more lags to evaluate.}
 
 \item{.facet_ncol}{Facets: Number of facet columns. Has no effect if using \code{grouped_df}.}
 
@@ -55,6 +57,10 @@ versus the \code{.value}. Useful for evaluating external lagged regressors.}
 \item{.point_size}{Point size}
 
 \item{.point_alpha}{Opacity. Adjust the transparency of the points. Range: (0, 1)}
+
+\item{.x_intercept}{Numeric lag. Adds a vertical line.}
+
+\item{.x_intercept_color}{Color for the x-intercept line.}
 
 \item{.hline_color}{Color for the y-intercept = 0 line.}
 
@@ -79,7 +85,7 @@ to multiple time series with \code{group_by()}.
 \details{
 \strong{Simplified ACF, PACF, & CCF}
 
-We are often interested in all 3 of these functions. Why not get all 3 at once?
+We are often interested in all 3 of these functions. Why not get all 3+ at once?
 Now you can.
 \itemize{
 \item \strong{ACF} - Autocorrelation between a target variable and lagged versions of itself
@@ -89,7 +95,16 @@ other lags highlighting key seasonalities.
 variable.
 }
 
-\strong{Scales to Multiple Time Series with Groupes}
+\strong{Lag Specification}
+
+Lags (\code{.lags}) can either be specified as:
+\itemize{
+\item A time-based phrase indicating a duraction (e.g. \verb{2 months})
+\item A maximum lag (e.g. \code{.lags = 28})
+\item A sequence of lags (e.g. \code{.lags = 7:28})
+}
+
+\strong{Scales to Multiple Time Series with Groups}
 
 The \code{plot_acf_diagnostics()} works with \code{grouped_df}'s, meaning you can
 group your time series by one or more categorical columns with \code{dplyr::group_by()}
@@ -113,7 +128,7 @@ m4_hourly \%>\%
     group_by(id) \%>\%
     plot_acf_diagnostics(
         date, value,               # ACF & PACF
-        .lags = 0:(24*7),          # 7-Days of hourly lags
+        .lags = "7 days",          # 7-Days of hourly lags
         .interactive = FALSE
     )
 
@@ -136,7 +151,7 @@ walmart_sales_weekly \%>\%
     plot_acf_diagnostics(
         Date, Weekly_Sales,        # ACF & PACF
         Temperature, Fuel_Price,   # CCFs
-        .lags        = 0:(4*3),    # 3 months of weekly lags
+        .lags        = "3 months", # 3 months of weekly lags
         .interactive = FALSE
     )
 

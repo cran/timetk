@@ -11,8 +11,11 @@
 #'  - 2 Differences is equivalent to measuring period acceleration.
 #' @param log If log differences should be calculated.
 #'  _Note that difference inversion of a log-difference is approximate._
-#' @param initial_values A numeric vector of the initial values, which are used for difference inversion.
+#' @param initial_values Only used in the `diff_vec_inv()` operation.
+#'  A numeric vector of the initial values, which are used to invert differences.
 #'  This vector is the original values that are the length of the `NA` missing differences.
+#' @param silent Whether or not to report the initial values used to invert the difference
+#'  as a message.
 #'
 #' @return A numeric vector
 #'
@@ -52,24 +55,29 @@
 #'   - Box Cox Transformation: [box_cox_vec()]
 #'   - Lag Transformation: [lag_vec()]
 #'   - Differencing Transformation: [diff_vec()]
-#'   - Rolling Window Transformation: [roll_apply_vec()]
+#'   - Rolling Window Transformation: [slidify_vec()]
 #'   - Loess Smoothing Transformation: [smooth_vec()]
 #'   - Fourier Series: [fourier_vec()]
-#'   - Missing Value Imputation for Time Series: [impute_ts_vec()]
+#'   - Missing Value Imputation for Time Series: [ts_impute_vec()], [ts_clean_vec()]
 #'
 #' @examples
 #' library(dplyr)
 #' library(timetk)
 #'
+#' # --- USAGE ----
+#'
+#' diff_vec(1:10, lag = 2, difference = 2) %>%
+#'     diff_inv_vec(lag = 2, difference = 2, initial_values = 1:4)
+#'
 #' # --- VECTOR ----
 #'
-#' # Change
+#' # Get Change
 #' 1:10 %>% diff_vec()
 #'
-#' # Acceleration
+#' # Get Acceleration
 #' 1:10 %>% diff_vec(difference = 2)
 #'
-#' # Approximate rate of change
+#' # Get approximate rate of change
 #' 1:10 %>% diff_vec(log = TRUE) %>% exp() - 1
 #'
 #'
@@ -91,30 +99,40 @@
 #'
 #' @name diff_vec
 #' @export
-diff_vec <- function(x, lag = 1, difference = 1, log = FALSE) {
+
+# DIFF ----
+
+#' @export
+#' @rdname diff_vec
+diff_vec <- function(x, lag = 1, difference = 1, log = FALSE, initial_values = NULL, silent = FALSE) {
     # Checks
-    if (length(lag) > 1) stop(call. = FALSE, "diff_vec(length(lag) > 1): Multiple lags detected. Use tk_augment_diff().")
-    if (length(difference) > 1) stop(call. = FALSE, "diff_vec(length(difference) > 1): Multiple differences detected. Use tk_augment_diff().")
+    if (length(lag) > 1) rlang::abort("length(lag) > 1): Multiple lags detected. Use tk_augment_diff().")
+    if (length(difference) > 1) rlang::abort("diff_vec(length(difference) > 1): Multiple differences detected. Use tk_augment_diff().")
+    if (!is.null(initial_values)) rlang::warn("`initial_values` are not required for the `diff_vec()` calculation.")
 
     UseMethod("diff_vec", x)
 }
 
 #' @export
-diff_vec.default <- function(x, lag = 1, difference = 1, log = FALSE) {
-    stop(paste0("diff_vec: No method for class ", class(x)[[1]], "."), call. = FALSE)
+diff_vec.default <- function(x, lag = 1, difference = 1, log = FALSE, initial_values = NULL, silent = FALSE) {
+    rlang::abort(paste0("diff_vec: No method for class ", class(x)[[1]], "."))
 }
 
 #' @export
-diff_vec.double <- function(x, lag = 1, difference = 1, log = FALSE) {
-    diff_calc(x, lag, difference, log)
+diff_vec.double <- function(x, lag = 1, difference = 1, log = FALSE, initial_values = NULL, silent = FALSE) {
+    diff_calc(x, lag, difference, log, silent)
 }
 
 #' @export
-diff_vec.integer <- function(x, lag = 1, difference = 1, log = FALSE) {
-    diff_calc(x, lag, difference, log)
+diff_vec.integer <- function(x, lag = 1, difference = 1, log = FALSE, initial_values = NULL, silent = FALSE) {
+    diff_calc(x, lag, difference, log, silent)
 }
 
-diff_calc <- function(x, lag, difference, log) {
+diff_calc <- function(x, lag, difference, log, silent = FALSE) {
+
+    if (!silent) message("diff_vec(): Initial values: ",
+                         stringr::str_c(x[1:(lag * difference)], collapse = ", "))
+
     ret_vec <- xts::diff.xts(
         x           = x,
         lag         = lag,

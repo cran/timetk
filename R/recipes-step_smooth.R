@@ -86,9 +86,10 @@
 #'  Time Series Analysis:
 #'  - Engineered Features: [step_timeseries_signature()], [step_holiday_signature()], [step_fourier()]
 #'  - Diffs & Lags [step_diff()], [recipes::step_lag()]
-#'  - Smoothing: [step_roll_apply()], [step_smooth()]
+#'  - Smoothing: [step_slidify()], [step_smooth()]
 #'  - Variance Reduction: [step_box_cox()]
-#'  - Imputation: [step_impute_ts()]
+#'  - Imputation: [step_ts_impute()], [step_ts_clean()]
+#'  - Padding: [step_ts_pad()]
 #'
 #'  Main Recipe Functions:
 #'  - [recipes::recipe()]
@@ -106,13 +107,10 @@
 #'     filter(symbol == "FB") %>%
 #'     select(symbol, date, adjusted)
 #'
-#' # New Data
+#' # New Data - Make some fake new data next 90 time stamps
 #' new_data <- FB_tbl %>%
-#'     tk_index() %>%
-#'     tk_make_future_timeseries(n_future = 90) %>%
-#'     tibble(date = .)  %>%
-#'     mutate(date = date) %>%
-#'     bind_cols(FB_tbl %>% slice((n() - 90 + 1):n()))
+#'     tail(90) %>%
+#'     mutate(date = date %>% tk_make_future_timeseries(length_out = 90))
 #'
 #' # ---- PERIOD ----
 #'
@@ -282,7 +280,7 @@ bake.step_smooth <- function(object, new_data, ...) {
     new_data
 }
 
-
+#' @export
 print.step_smooth <-
     function(x, width = max(20, options()$width - 35), ...) {
         cat("Smoother: Local Polynomial Regression Fitting (Loess) on ")

@@ -124,13 +124,10 @@ FB_tbl <- FANG \%>\%
     filter(symbol == "FB") \%>\%
     select(symbol, date, adjusted)
 
-# New Data
+# New Data - Make some fake new data next 90 time stamps
 new_data <- FB_tbl \%>\%
-    tk_index() \%>\%
-    tk_make_future_timeseries(n_future = 90) \%>\%
-    tibble(date = .)  \%>\%
-    mutate(date = date) \%>\%
-    bind_cols(FB_tbl \%>\% slice((n() - 90 + 1):n()))
+    tail(90) \%>\%
+    mutate(date = date \%>\% tk_make_future_timeseries(length_out = 90))
 
 # ---- PERIOD ----
 
@@ -193,9 +190,10 @@ Time Series Analysis:
 \itemize{
 \item Engineered Features: \code{\link[=step_timeseries_signature]{step_timeseries_signature()}}, \code{\link[=step_holiday_signature]{step_holiday_signature()}}, \code{\link[=step_fourier]{step_fourier()}}
 \item Diffs & Lags \code{\link[=step_diff]{step_diff()}}, \code{\link[recipes:step_lag]{recipes::step_lag()}}
-\item Smoothing: \code{\link[=step_roll_apply]{step_roll_apply()}}, \code{\link[=step_smooth]{step_smooth()}}
+\item Smoothing: \code{\link[=step_slidify]{step_slidify()}}, \code{\link[=step_smooth]{step_smooth()}}
 \item Variance Reduction: \code{\link[=step_box_cox]{step_box_cox()}}
-\item Imputation: \code{\link[=step_impute_ts]{step_impute_ts()}}
+\item Imputation: \code{\link[=step_ts_impute]{step_ts_impute()}}, \code{\link[=step_ts_clean]{step_ts_clean()}}
+\item Padding: \code{\link[=step_ts_pad]{step_ts_pad()}}
 }
 
 Main Recipe Functions:

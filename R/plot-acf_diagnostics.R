@@ -12,7 +12,7 @@
 #'  performed.
 #' @param ... Additional features to perform Lag Cross Correlations (CCFs)
 #' versus the `.value`. Useful for evaluating external lagged regressors.
-#' @param .lags A seqence of one or more lags to evaluate.
+#' @param .lags A sequence of one or more lags to evaluate.
 #' @param .facet_ncol Facets: Number of facet columns. Has no effect if using `grouped_df`.
 #' @param .facet_scales Facets: Options include "fixed", "free", "free_y", "free_x"
 #' @param .line_color Line color. Use keyword: "scale_color" to change the color by the facet.
@@ -21,6 +21,8 @@
 #' @param .point_color Point color. Use keyword: "scale_color" to change the color by the facet.
 #' @param .point_size Point size
 #' @param .point_alpha Opacity. Adjust the transparency of the points. Range: (0, 1)
+#' @param .x_intercept Numeric lag. Adds a vertical line.
+#' @param .x_intercept_color Color for the x-intercept line.
 #' @param .hline_color Color for the y-intercept = 0 line.
 #' @param .title Title for the plot
 #' @param .x_lab X-axis label for the plot
@@ -34,7 +36,7 @@
 #'
 #' __Simplified ACF, PACF, & CCF__
 #'
-#' We are often interested in all 3 of these functions. Why not get all 3 at once?
+#' We are often interested in all 3 of these functions. Why not get all 3+ at once?
 #' Now you can.
 #'
 #' - __ACF__ - Autocorrelation between a target variable and lagged versions of itself
@@ -45,8 +47,15 @@
 #' - __CCF__ - Shows how lagged predictors can be used for prediction of a target
 #'  variable.
 #'
+#' __Lag Specification__
 #'
-#' __Scales to Multiple Time Series with Groupes__
+#' Lags (`.lags`) can either be specified as:
+#'
+#' - A time-based phrase indicating a duraction (e.g. `2 months`)
+#' - A maximum lag (e.g. `.lags = 28`)
+#' - A sequence of lags (e.g. `.lags = 7:28`)
+#'
+#' __Scales to Multiple Time Series with Groups__
 #'
 #' The `plot_acf_diagnostics()` works with `grouped_df`'s, meaning you can
 #' group your time series by one or more categorical columns with `dplyr::group_by()`
@@ -75,7 +84,7 @@
 #'     group_by(id) %>%
 #'     plot_acf_diagnostics(
 #'         date, value,               # ACF & PACF
-#'         .lags = 0:(24*7),          # 7-Days of hourly lags
+#'         .lags = "7 days",          # 7-Days of hourly lags
 #'         .interactive = FALSE
 #'     )
 #'
@@ -98,17 +107,19 @@
 #'     plot_acf_diagnostics(
 #'         Date, Weekly_Sales,        # ACF & PACF
 #'         Temperature, Fuel_Price,   # CCFs
-#'         .lags        = 0:(4*3),    # 3 months of weekly lags
+#'         .lags        = "3 months", # 3 months of weekly lags
 #'         .interactive = FALSE
 #'     )
 #'
 #' @export
-plot_acf_diagnostics <- function(.data, .date_var, .value, ..., .lags = 0:20,
+plot_acf_diagnostics <- function(.data, .date_var, .value, ..., .lags = 1000,
                                  .facet_ncol = 1, .facet_scales = "fixed",
                                  .line_color = "#2c3e50", .line_size = 0.5,
                                  .line_alpha = 1,
                                  .point_color = "#2c3e50", .point_size = 1,
                                  .point_alpha = 1,
+                                 .x_intercept = NULL,
+                                 .x_intercept_color = "#E31A1C",
                                  .hline_color = "#2c3e50",
                                  .title = "Lag Diagnostics",
                                  .x_lab = "Lag", .y_lab = "Correlation",
@@ -127,12 +138,14 @@ plot_acf_diagnostics <- function(.data, .date_var, .value, ..., .lags = 0:20,
 }
 
 #' @export
-plot_acf_diagnostics.data.frame <- function(.data, .date_var, .value, ..., .lags = 0:20,
+plot_acf_diagnostics.data.frame <- function(.data, .date_var, .value, ..., .lags = 1000,
                                             .facet_ncol = 1, .facet_scales = "fixed",
                                             .line_color = "#2c3e50", .line_size = 0.5,
                                             .line_alpha = 1,
                                             .point_color = "#2c3e50", .point_size = 1,
                                             .point_alpha = 1,
+                                            .x_intercept = NULL,
+                                            .x_intercept_color = "#E31A1C",
                                             .hline_color = "#2c3e50",
                                             .title = "Lag Diagnostics",
                                             .x_lab = "Lag", .y_lab = "Correlation",
@@ -144,7 +157,7 @@ plot_acf_diagnostics.data.frame <- function(.data, .date_var, .value, ..., .lags
     # ---- DATA PREPARATION ----
 
     data_formatted <- tk_acf_diagnostics(
-        .data     = .data,
+        .data     = tibble::as_tibble(.data),
         .date_var = !! rlang::enquo(.date_var),
         .value    = !! value_expr,
         ...       = ...,
@@ -163,6 +176,11 @@ plot_acf_diagnostics.data.frame <- function(.data, .date_var, .value, ..., .lags
         ggplot2::facet_wrap(~ name, ncol = .facet_ncol, scales = .facet_scales) +
         ggplot2::expand_limits(y = 0) +
         ggplot2::labs(x = .x_lab, y = .y_lab, title = .title)
+
+    if (!is.null(.x_intercept)) {
+        if (!is.numeric(.x_intercept)) rlang::abort("`.x_intercept` must be a numeric value.")
+        g <- g + ggplot2::geom_vline(xintercept = .x_intercept, color = .x_intercept_color)
+    }
 
     # Add line
     if (.line_color == "scale_color") {
@@ -208,12 +226,14 @@ plot_acf_diagnostics.data.frame <- function(.data, .date_var, .value, ..., .lags
 }
 
 #' @export
-plot_acf_diagnostics.grouped_df <- function(.data, .date_var, .value, ..., .lags = 0:20,
+plot_acf_diagnostics.grouped_df <- function(.data, .date_var, .value, ..., .lags = 1000,
                                             .facet_ncol = 1, .facet_scales = "fixed",
                                             .line_color = "#2c3e50", .line_size = 0.5,
                                             .line_alpha = 1,
                                             .point_color = "#2c3e50", .point_size = 1,
                                             .point_alpha = 1,
+                                            .x_intercept = NULL,
+                                            .x_intercept_color = "#E31A1C",
                                             .hline_color = "#2c3e50",
                                             .title = "ACF Diagnostics",
                                             .x_lab = "Lag", .y_lab = "Correlation",
@@ -255,6 +275,11 @@ plot_acf_diagnostics.grouped_df <- function(.data, .date_var, .value, ..., .lags
                             scales = .facet_scales) +
         ggplot2::expand_limits(y = 0) +
         ggplot2::labs(x = .x_lab, y = .y_lab, title = .title)
+
+    if (!is.null(.x_intercept)) {
+        if (!is.numeric(.x_intercept)) rlang::abort("`.x_intercept` must be a numeric value.")
+        g <- g + ggplot2::geom_vline(xintercept = .x_intercept, color = .x_intercept_color)
+    }
 
     # Add line
     if (.line_color == "scale_color") {

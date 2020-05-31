@@ -26,8 +26,10 @@
 #'  conducted on new data (e.g. processing the outcome variable(s)).
 #'  Care should be taken when using `skip = TRUE` as it may affect
 #'  the computations for subsequent operations
+#'
 #' @return An updated version of `recipe` with the
 #'   new step added to the sequence of existing steps (if any).
+#'
 #' @details The step assumes that the data are already _in the proper sequential
 #'  order_ for lagging.
 #'
@@ -35,9 +37,10 @@
 #'  Time Series Analysis:
 #'  - Engineered Features: [step_timeseries_signature()], [step_holiday_signature()], [step_fourier()]
 #'  - Diffs & Lags [step_diff()], [recipes::step_lag()]
-#'  - Smoothing: [step_roll_apply()], [step_smooth()]
+#'  - Smoothing: [step_slidify()], [step_smooth()]
 #'  - Variance Reduction: [step_box_cox()]
-#'  - Imputation: [step_impute_ts()]
+#'  - Imputation: [step_ts_impute()], [step_ts_clean()]
+#'  - Padding: [step_ts_pad()]
 #'
 #'  Remove NA Values:
 #'  - [recipes::step_naomit()]
@@ -126,6 +129,9 @@ step_diff_new <-
 
 #' @export
 prep.step_diff <- function(x, training, info = NULL, ...) {
+
+    # TODO - PRESERVE INITIAL VALUES x[1:(lag * difference)]
+
     step_diff_new(
         terms       = x$terms,
         role        = x$role,
@@ -156,6 +162,7 @@ bake.step_diff <- function(object, new_data, ...) {
             lag        = lag_val,
             difference = diff_val,
             log        = object$log,
+            silent     = TRUE,
             .ns        = "timetk"
         )
     }
@@ -173,6 +180,7 @@ bake.step_diff <- function(object, new_data, ...) {
     tibble::as_tibble(dplyr::mutate(new_data, !!!calls))
 }
 
+#' @export
 print.step_diff <-
     function(x, width = max(20, options()$width - 30), ...) {
         cat("Differencing ",  sep = "")

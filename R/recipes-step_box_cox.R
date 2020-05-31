@@ -76,9 +76,10 @@
 #'  Time Series Analysis:
 #'  - Engineered Features: [step_timeseries_signature()], [step_holiday_signature()], [step_fourier()]
 #'  - Diffs & Lags [step_diff()], [recipes::step_lag()]
-#'  - Smoothing: [step_roll_apply()], [step_smooth()]
+#'  - Smoothing: [step_slidify()], [step_smooth()]
 #'  - Variance Reduction: [step_box_cox()]
-#'  - Imputation: [step_impute_ts()]
+#'  - Imputation: [step_ts_impute()], [step_ts_clean()]
+#'  - Padding: [step_ts_pad()]
 #'
 #' Transformations to reduce variance:
 #' - [recipes::step_log()] - Log transformation
@@ -180,6 +181,7 @@ bake.step_box_cox <- function(object, new_data, ...) {
     tibble::as_tibble(new_data)
 }
 
+#' @export
 print.step_box_cox <-
     function(x, width = max(20, options()$width - 35), ...) {
         cat("Box-Cox transformation on ", sep = "")

@@ -38,17 +38,6 @@ m4_daily %>%
                    .facet_ncol = 2, .facet_scales = "free",
                    .interactive = interactive)
 
-## ---- message=TRUE------------------------------------------------------------
-m4_daily %>%
-  group_by(id) %>%
-  plot_time_series(date, value, 
-                   .facet_ncol = 2, .facet_scales = "free", 
-                    # Note that D10 and D410 have less than 730 observations
-                   .smooth_period  = "2 year",
-                   # Shows the trend period selected
-                   .smooth_message = TRUE, 
-                   .interactive = interactive) 
-
 ## -----------------------------------------------------------------------------
 m4_hourly %>% group_by(id)
 

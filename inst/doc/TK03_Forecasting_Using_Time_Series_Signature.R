@@ -139,7 +139,7 @@ bikes_summary[1:6]
 bikes_summary[7:12]
 
 ## -----------------------------------------------------------------------------
-idx_future <- idx %>% tk_make_future_timeseries(n_future = 180)
+idx_future <- idx %>% tk_make_future_timeseries(length_out = 180)
 
 future_tbl <- tibble(date = idx_future) 
 

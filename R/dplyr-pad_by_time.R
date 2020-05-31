@@ -34,7 +34,7 @@
 #' @seealso
 #'
 #' Imputation:
-#' - [impute_ts_vec()] - Impute missing values for time series.
+#' - [ts_impute_vec()] - Impute missing values for time series.
 #'
 #' Additional Time-Based `dplyr`-style functions:
 #'
@@ -76,12 +76,12 @@
 #' # Can then impute missing values
 #' missing_data_tbl %>%
 #'     pad_by_time(date, .by = "quarter") %>%
-#'     mutate(value = impute_ts_vec(value, period = 1))
+#'     mutate(value = ts_impute_vec(value, period = 1))
 #'
 #' # --- GROUPS ----
 #' FANG %>%
 #'     group_by(symbol) %>%
-#'     pad_by_time(date, .by = "day")
+#'     pad_by_time(.by = "day")
 #'
 #' @name pad_by_time
 #' @export
@@ -111,7 +111,7 @@ pad_by_time.grouped_df <- function(.data, .date_var, .by = "auto", .pad_value = 
     date_var_expr <- rlang::enquo(.date_var)
 
     if (rlang::quo_is_missing(rlang::enquo(.date_var))) {
-        date_var_expr <- rlang::ensym(tk_get_timeseries_variables(.data)[1])
+        date_var_expr <- rlang::sym(tk_get_timeseries_variables(.data)[1])
     }
 
 
@@ -163,23 +163,32 @@ padder <- function(.data, .date_var, .by = "auto", .pad_value = NA,
     }
 
     # Apply the padding
-    ret <- padr::pad(
-        x           = .data,
-        by          = rlang::quo_name(date_var_expr),
-        interval    = .by,
-        start_val   = .start_date,
-        end_val     = .end_date,
-        group       = .group,
-        break_above = .stop_padding_if
-    )
+    ret <- .data %>%
+        dplyr::mutate(check_missing = 1) %>%
+        padr::pad(
+            by          = rlang::quo_name(date_var_expr),
+            interval    = .by,
+            start_val   = .start_date,
+            end_val     = .end_date,
+            group       = .group,
+            break_above = .stop_padding_if
+        )
 
     # Replace fill values
     if (!is.na(.pad_value)) {
-        ret[is.na(ret)] <- .pad_value
+        # ret[is.na(ret)] <- .pad_value
+        ret <- ret %>%
+            dplyr::mutate_at(
+                .vars = dplyr::vars(-(!! date_var_expr), -check_missing),
+                .f = function(x) {
+                    ifelse(is.na(ret$check_missing), .pad_value, x)
+                }
+            )
     }
 
-    # Make tibble
-    if(!tibble::is_tibble(ret)) ret <- tibble::as_tibble(ret)
+    # Drop check_missing column
+    ret <- ret %>%
+        dplyr::select(-check_missing)
 
     return(ret)
 

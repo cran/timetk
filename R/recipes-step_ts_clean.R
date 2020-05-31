@@ -1,17 +1,9 @@
-#' Imputation for Time Series using Forecast Methods
+#' Clean Outliers and Missing Data for Time Series
 #'
-#' `step_impute_ts` creates a *specification* of a recipe
-#'  step that will impute time series data.
+#' `step_ts_clean` creates a *specification* of a recipe
+#'  step that will clean outliers and impute time series data.
 #'
-#' @inheritParams step_box_cox
-#' @param period A seasonal period to use during the transformation. If `period = 1`,
-#'  linear interpolation is performed. If `period > 1`, a robust STL decomposition is
-#'  first performed and a linear interpolation is applied to the seasonally adjusted data.
-#' @param lambda A box cox transformation parameter. If set to `"auto"`, performs
-#'  automated lambda selection.
-#' @param lambdas_trained A named numeric vector of lambdas. This is `NULL` until computed
-#'  by [prep.recipe()]. Note that, if the original data are integers, the mean
-#'  will be converted to an integer to maintain the same a data type.
+#' @inheritParams step_ts_impute
 #'
 #' @return An updated version of `recipe` with the new step
 #'  added to the sequence of existing steps (if any). For the
@@ -21,12 +13,21 @@
 #'
 #' @details
 #'
-#' The `step_impute_ts()` function is designed specifically to handle time series
-#' using seaonal imputation methods implemented in the Forecast R Package.
+#' The `step_ts_clean()` function is designed specifically to handle time series
+#' using seasonal outlier detection methods implemented in the Forecast R Package.
+#'
+#' __Cleaning Outliers__
+#'
+#' #' Outliers are replaced with missing values using the following methods:
+#'
+#' 1. Non-Seasonal (`period = 1`): Uses `stats::supsmu()`
+#' 2. Seasonal (`period > 1`): Uses `forecast::mstl()` with `robust = TRUE` (robust STL decomposition)
+#'  for seasonal series.
+#'
 #'
 #' __Imputation using Linear Interpolation__
 #'
-#' Two circumstances cause strictly linear interpolation:
+#' Three circumstances cause strictly linear interpolation:
 #'
 #'   1. __Period is 1:__ With `period = 1`, a seasonality cannot be interpreted and therefore linear is used.
 #'   2. __Number of Non-Missing Values is less than 2-Periods__: Insufficient values exist to detect seasonality.
@@ -48,9 +49,10 @@
 #'  Time Series Analysis:
 #'  - Engineered Features: [step_timeseries_signature()], [step_holiday_signature()], [step_fourier()]
 #'  - Diffs & Lags [step_diff()], [recipes::step_lag()]
-#'  - Smoothing: [step_roll_apply()], [step_smooth()]
+#'  - Smoothing: [step_slidify()], [step_smooth()]
 #'  - Variance Reduction: [step_box_cox()]
-#'  - Imputation: [step_impute_ts()]
+#'  - Imputation: [step_ts_impute()], [step_ts_clean()]
+#'  - Padding: [step_ts_pad()]
 #'
 #' @references
 #' - [Forecast R Package](https://github.com/robjhyndman/forecast)
@@ -73,7 +75,7 @@
 #'
 #' # Apply Imputation
 #' recipe_box_cox <- recipe(~ ., data = FANG_wide) %>%
-#'     step_impute_ts(FB, AMZN, NFLX, GOOG, period = 252) %>%
+#'     step_ts_clean(FB, AMZN, NFLX, GOOG, period = 252) %>%
 #'     prep()
 #'
 #' recipe_box_cox %>% bake(FANG_wide)
@@ -82,23 +84,9 @@
 #' recipe_box_cox %>% tidy(1)
 #'
 #'
-#' @seealso
-#'
-#'  Time Series Analysis:
-#'  - [step_timeseries_signature()], [step_holiday_signature()]
-#'  - [step_diff()], [recipes::step_lag()]
-#'  - [step_roll_apply()], [step_smooth()]
-#'  - [step_box_cox()]
-#'  - [step_impute_ts()]
-#'
-#'
-#' Recipe Setup and Application:
-#' - Create: [recipes::recipe()]
-#' - Prepare: [recipes::prep.recipe()]
-#' - Apply: [recipes::bake.recipe()]
 #'
 #' @export
-step_impute_ts <-
+step_ts_clean <-
     function(recipe,
              ...,
              period = 1,
@@ -107,11 +95,11 @@ step_impute_ts <-
              trained = FALSE,
              lambdas_trained = NULL,
              skip = FALSE,
-             id = rand_id("impute_ts")) {
+             id = rand_id("ts_clean")) {
 
         recipes::add_step(
             recipe,
-            step_impute_ts_new(
+            step_ts_clean_new(
                 terms           = recipes::ellipse_check(...),
                 role            = role,
                 trained         = trained,
@@ -126,10 +114,10 @@ step_impute_ts <-
         )
     }
 
-step_impute_ts_new <-
+step_ts_clean_new <-
     function(terms, role, trained, period, lambda, lambdas_trained, skip, id) {
         recipes::step(
-            subclass   = "impute_ts",
+            subclass   = "ts_clean",
             terms      = terms,
             role       = role,
             trained    = trained,
@@ -144,24 +132,24 @@ step_impute_ts_new <-
     }
 
 #' @export
-prep.step_impute_ts <- function(x, training, info = NULL, ...) {
+prep.step_ts_clean <- function(x, training, info = NULL, ...) {
 
     col_names <- terms_select(x$terms, info = info)
     recipes::check_type(training[, col_names])
 
     # Lambda Calculation
-    if (x$lambda[1] == "auto") {
+    if (is.null(x$lambda[1])) {
+        lambda_values <- rep(NA, length(col_names))
+        names(lambda_values) <- col_names
+    } else if (x$lambda[1] == "auto") {
         lambda_values <- training[, col_names] %>%
             purrr::map(auto_lambda)
-    } else if (is.null(x$lamda[1])) {
-        lambda_values <- rep(NULL, length(col_names))
-        names(lambda_values) <- col_names
     } else {
         lambda_values <- rep(x$lambda[1], length(col_names))
         names(lambda_values) <- col_names
     }
 
-    step_impute_ts_new(
+    step_ts_clean_new(
         terms           = x$terms,
         role            = x$role,
         trained         = TRUE,
@@ -176,7 +164,7 @@ prep.step_impute_ts <- function(x, training, info = NULL, ...) {
 }
 
 #' @export
-bake.step_impute_ts <- function(object, new_data, ...) {
+bake.step_ts_clean <- function(object, new_data, ...) {
 
     col_names <- names(object$lambdas_trained)
 
@@ -184,11 +172,11 @@ bake.step_impute_ts <- function(object, new_data, ...) {
 
         # Handle "non-numeric" naming issue
         val_i <- object$lambdas_trained[i]
-        if (!is.null(val_i)) {
+        if (!is.na(val_i)) {
             val_i <- as.numeric(val_i)
         }
 
-        new_data[, col_names[i]] <- impute_ts_vec(
+        new_data[, col_names[i]] <- ts_clean_vec(
             x      = new_data %>% purrr::pluck(col_names[i]),
             period = object$period[1],
             lambda = val_i
@@ -198,20 +186,20 @@ bake.step_impute_ts <- function(object, new_data, ...) {
     tibble::as_tibble(new_data)
 }
 
-print.step_impute_ts <-
-    function(x, width = max(20, options()$width - 35), ...) {
-        cat("Time Series Imputation on ", sep = "")
-        printer(names(x$lambdas_trained), x$terms, x$trained, width = width)
-        invisible(x)
-    }
-
-
-
-
-#' @rdname step_impute_ts
-#' @param x A `step_impute_ts` object.
 #' @export
-tidy.step_impute_ts <- function(x, ...) {
+print.step_ts_clean <- function(x, width = max(20, options()$width - 35), ...) {
+    cat("Time Series Outlier Cleaning on ", sep = "")
+    printer(names(x$lambdas_trained), x$terms, x$trained, width = width)
+    invisible(x)
+}
+
+
+
+
+#' @rdname step_ts_clean
+#' @param x A `step_ts_clean` object.
+#' @export
+tidy.step_ts_clean <- function(x, ...) {
     if (is_trained(x)) {
         res <- tibble::tibble(
             terms  = names(x$lambdas_trained),

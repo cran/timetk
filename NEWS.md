@@ -2,21 +2,94 @@
 <!--
 __TODO:__
 
-
 SMALLER ITEMS:
-1. Outlier diagnostics
-2. Missing value diagnostics
-3. Weather signature
-4. tsibble integration
+1. Missing value diagnostics
+2. tsibble integration
 
-- Weather
-    - Reim integration
-    - `tk_get_weather_signature()`, `tk_augment_weather_signature()`
-    - `step_weather_signature()`
+TESTS (Boooo)
+- Wait until timetk has stabilized
 
-- Tests (Boooo)
+Research
+- Weather?
+
+__New Tune Parameter Ranking and Selection Tools__:
+
+- `tk_parameter_ranking` - Ranks parameters using tune error metrics (model accuracy), failure rates (model robustness), and standard error (model variability)
+- `tk_parameter_select_by_row` - Selection tool for ranked parameters.
+
+* `plot_parameter_ranking()`: Plots the ranked hyperparameter tuning result output from `tk_parameter_ranking()`
 
 -->
+
+# timetk 1.0.0.9000
+
+__New Interactive Plotting Functions__
+
+* `plot_anomaly_diagnostics()`: Visualize Anomalies for One or More Time Series
+
+__New Data Wrangling Functions__
+
+* `future_frame()`: Make a future tibble from an existing time-based tibble.
+
+__New Diagnostic / Data Processing Functions__
+
+* `tk_anomaly_diagnostics()`  - Group-wise anomaly detection and diagnostics. A wrapper for the `anomalize` R package functions without importing `anomalize`.  
+
+__New Vectorized Functions__:
+
+* `ts_clean_vec()` - Replace Outliers & Missing Values in a Time Series
+* `standardize_vec()` - Centers and scales a time series to mean 0, standard deviation 1
+* `normalize_vec()` - Normalizes a time series to Range: (0, 1)
+
+__New Recipes Preprocessing Steps__:
+
+* `step_ts_pad()` - Preprocessing for padding time series data. Adds rows to fill in gaps and can be used with `step_ts_impute()` to interpolate going from low to high frequency!
+* `step_ts_clean()` - Preprocessing step for cleaning outliers and imputing missing values in a time series.
+
+
+
+__New Parsing Functions__
+
+* `parse_date2()` and `parse_datetime2()`: These are similar to `readr::parse_date()` and `lubridate::as_date()` in that they parse character vectors to date and datetimes. The key advantage is SPEED. `parse_date2()` uses `anytime` package to process using C++ `Boost.Date_Time` library.
+
+__Improvements__:
+
+* `plot_acf_diagnostics()`: The `.lags` argument now handles time-based phrases (e.g. `.lags = "1 month"`).
+* `time_series_cv()`: Implements time-based phrases (e.g. `initial = "5 years"` and `assess = "1 year"`)
+* `tk_make_future_timeseries()`: The `n_future` argument has been deprecated for a new `length_out` argument that accepts both numeric input (e.g. `length_out = 12`) and time-based phrases (e.g. `length_out = "12 months"`). A major improvement is that numeric values define the number of timestamps returned even if weekends are removed or holidays are removed. Thus, you can always anticipate the length. ([Issue #19](https://github.com/business-science/timetk/issues/19)).
+* `diff_vec`: Now reports the initial values used in the differencing calculation. 
+
+__Bug Fixes__:
+
+* `plot_time_series()`: 
+    - Fix name collision when `.value = .value`. 
+* `tk_make_future_timeseries()`: 
+    - Respect timezones
+* `time_series_cv()`: 
+    - Fix incorrect calculation of starts/stops
+    - Make `skip = 1` default. `skip = 0` does not make sense. 
+    - Fix issue with `skip` adding 1 to stops. 
+    - Fix printing method
+* `plot_time_series_cv_plan()` & `tk_time_series_cv_plan()`: 
+    - Prevent name collisions when underlying data has column "id" or "splits"
+* `tk_make_future_timeseries()`: 
+    - Fix bug when day of month doesn't exist. Lubridate `period()` returns `NA`. Fix implemented with `ceiling_date()`.
+* `pad_by_time()`: 
+    - Fix `pad_value` so only inserts pad values where new row was inserted. 
+* `step_ts_clean()`, `step_ts_impute()`: 
+    - Fix issue with `lambda = NULL`
+    
+__Breaking Changes__:
+
+These should not be of major impact since the 1.0.0 version was just released. 
+
+* Renamed `impute_ts_vec()` to `ts_impute_vec()` for consistency with `ts_clean_vec()`
+* Renamed `step_impute_ts()` to `step_ts_impute()` for consistency with underlying function
+* Renamed `roll_apply_vec()` to `slidify_vec()` for consistency with `slidify()` & relationship to `slider` R package
+* Renamed `step_roll_apply` to `step_slidify()` for consistency with `slidify()` & relationship to `slider` R package
+* Renamed `tk_augment_roll_apply` to `tk_augment_slidify()` for consistency with `slidify()` & relationship to `slider` R package
+* `plot_time_series_cv_plan()` and `tk_time_series_cv_plan()`: Changed argument from `.rset` to `.data`. 
+
 
 # timetk 1.0.0 
 
