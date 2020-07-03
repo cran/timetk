@@ -1,7 +1,7 @@
 Package: timetk
 Type: Package
 Title: A Tool Kit for Working with Time Series in R
-Version: 2.0.0
+Version: 2.1.0
 Authors@R: c(
     person("Matt", "Dancho", email = "mdancho@business-science.io", role = c("aut", "cre")),
     person("Davis", "Vaughan", email = "dvaughan@business-science.io", role = c("aut"))
@@ -24,17 +24,17 @@ Imports: recipes (>= 0.1.4), rsample, dplyr (>= 0.7.0), ggplot2,
         forcats, stringr, plotly, lazyeval (>= 0.2.0), lubridate (>=
         1.6.0), padr (>= 0.3.0), purrr (>= 0.2.2), readr (>= 1.0.0),
         stringi (>= 1.1.5), tibble (>= 1.2), tidyr (>= 0.6.1), xts (>=
-        0.9-7), zoo (>= 1.7-14), rlang (>= 0.1.2), slider, anytime,
-        timeDate, forecast, hms, assertthat
-Suggests: tidyquant, workflows, parsnip, tune, yardstick, tidyverse,
-        knitr, rmarkdown, robets, broom, scales, testthat, fracdiff,
-        timeSeries, tseries, roxygen2
+        0.9-7), zoo (>= 1.7-14), rlang (>= 0.1.2), tidyselect, slider,
+        anytime, timeDate, forecast, hms, assertthat
+Suggests: tidyquant, tidymodels, modeltime, workflows, parsnip, tune,
+        yardstick, tidyverse, knitr, rmarkdown, robets, broom, scales,
+        testthat, fracdiff, timeSeries, tseries, roxygen2
 RoxygenNote: 7.1.0
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2020-05-30 23:44:47 UTC; mdancho
+Packaged: 2020-07-03 10:52:50 UTC; mdancho
 Author: Matt Dancho [aut, cre],
   Davis Vaughan [aut]
 Maintainer: Matt Dancho <mdancho@business-science.io>
 Repository: CRAN
-Date/Publication: 2020-05-31 04:20:02 UTC
+Date/Publication: 2020-07-03 11:40:02 UTC

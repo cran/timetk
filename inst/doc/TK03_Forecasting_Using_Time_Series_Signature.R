@@ -12,201 +12,96 @@ knitr::opts_chunk$set(
 # devtools::load_all() # Travis CI fails on load_all()
 
 ## ---- message = FALSE---------------------------------------------------------
-library(workflows)
-library(parsnip)
-library(recipes)
-library(yardstick)
+library(tidymodels)
+library(modeltime)
 library(tidyverse)
-library(tidyquant)
 library(timetk)
+
+# Used to convert plots from interactive to static
+interactive = FALSE
 
 ## -----------------------------------------------------------------------------
 # Read data
-bikes_tbl <- bike_sharing_daily %>%
-    select(dteday, cnt) %>%
-    rename(date  = dteday,
-           value = cnt)
+bike_transactions_tbl <- bike_sharing_daily %>%
+  select(dteday, cnt) %>%
+  set_names(c("date", "value")) 
 
-bikes_tbl
-
-## -----------------------------------------------------------------------------
-# Visualize data and training/testing regions
-bikes_tbl %>%
-    ggplot(aes(x = date, y = value)) +
-    geom_rect(xmin = as.numeric(ymd("2012-07-01")),
-              xmax = as.numeric(ymd("2013-01-01")),
-              ymin = 0, ymax = 10000,
-              fill = palette_light()[[4]], alpha = 0.01) +
-    annotate("text", x = ymd("2011-10-01"), y = 7800,
-             color = palette_light()[[1]], label = "Train Region") +
-    annotate("text", x = ymd("2012-10-01"), y = 1550,
-             color = palette_light()[[1]], label = "Test Region") +
-    geom_point(alpha = 0.5, color = palette_light()[[1]]) +
-    labs(title = "Bikes Sharing Dataset: Daily Scale", x = "") +
-    theme_tq()
+bike_transactions_tbl
 
 ## -----------------------------------------------------------------------------
-# Split into training and test sets
-train_tbl <- bikes_tbl %>% filter(date < ymd("2012-07-01"))
-test_tbl  <- bikes_tbl %>% filter(date >= ymd("2012-07-01"))
+bike_transactions_tbl %>%
+  plot_time_series(date, value, .interactive = interactive)
 
 ## -----------------------------------------------------------------------------
-# Training set
-train_tbl
+splits <- bike_transactions_tbl %>%
+  time_series_split(assess = "3 months", cumulative = TRUE)
+
+## -----------------------------------------------------------------------------
+splits %>%
+  tk_time_series_cv_plan() %>%
+  plot_time_series_cv_plan(date, value, .interactive = interactive)
 
 ## -----------------------------------------------------------------------------
 # Add time series signature
-recipe_spec_timeseries <- recipe(value ~ ., data = train_tbl) %>%
+recipe_spec_timeseries <- recipe(value ~ ., data = training(splits)) %>%
     step_timeseries_signature(date) 
 
 ## -----------------------------------------------------------------------------
-bake(prep(recipe_spec_timeseries), new_data = train_tbl)
+bake(prep(recipe_spec_timeseries), new_data = training(splits))
 
 ## -----------------------------------------------------------------------------
 recipe_spec_final <- recipe_spec_timeseries %>%
+    step_fourier(date, period = 365, K = 5) %>%
     step_rm(date) %>%
     step_rm(contains("iso"), contains("minute"), contains("hour"),
             contains("am.pm"), contains("xts")) %>%
     step_normalize(contains("index.num"), date_year) %>%
     step_dummy(contains("lbl"), one_hot = TRUE) 
 
-bake(prep(recipe_spec_final), new_data = train_tbl)
+juice(prep(recipe_spec_final))
 
 ## -----------------------------------------------------------------------------
-model_spec_glmnet <- linear_reg(mode = "regression") %>%
+model_spec_lm <- linear_reg(mode = "regression") %>%
     set_engine("lm")
 
 ## -----------------------------------------------------------------------------
-workflow_glmnet <- workflow() %>%
+workflow_lm <- workflow() %>%
     add_recipe(recipe_spec_final) %>%
-    add_model(model_spec_glmnet)
+    add_model(model_spec_lm)
 
-workflow_glmnet
-
-## -----------------------------------------------------------------------------
-workflow_trained <- workflow_glmnet %>% fit(data = train_tbl)
+workflow_lm
 
 ## -----------------------------------------------------------------------------
-prediction_tbl <- workflow_trained %>% 
-    predict(test_tbl) %>%
-    bind_cols(test_tbl) 
+workflow_fit_lm <- workflow_lm %>% fit(data = training(splits))
 
-prediction_tbl
+## ---- paged.print = F---------------------------------------------------------
+model_table <- modeltime_table(
+  workflow_fit_lm
+) 
 
-## -----------------------------------------------------------------------------
-ggplot(aes(x = date), data = bikes_tbl) +
-    geom_rect(xmin = as.numeric(ymd("2012-07-01")),
-              xmax = as.numeric(ymd("2013-01-01")),
-              ymin = 0, ymax = 10000,
-              fill = palette_light()[[4]], alpha = 0.01) +
-    annotate("text", x = ymd("2011-10-01"), y = 7800,
-             color = palette_light()[[1]], label = "Train Region") +
-    annotate("text", x = ymd("2012-10-01"), y = 1550,
-             color = palette_light()[[1]], label = "Test Region") + 
-    geom_point(aes(x = date, y = value),  
-               alpha = 0.5, color = palette_light()[[1]]) +
-    # Add predictions
-    geom_point(aes(x = date, y = .pred), data = prediction_tbl, 
-               alpha = 0.5, color = palette_light()[[2]]) +
-    theme_tq() 
-    
+model_table
+
+## ---- paged.print = F---------------------------------------------------------
+calibration_table <- model_table %>%
+  modeltime_calibrate(testing(splits))
+
+calibration_table
 
 ## -----------------------------------------------------------------------------
-# Calculating forecast error
-prediction_tbl %>% metrics(value, .pred)
+calibration_table %>%
+  modeltime_forecast(actual_data = bike_transactions_tbl) %>%
+  plot_modeltime_forecast(.interactive = interactive)
 
 ## -----------------------------------------------------------------------------
-prediction_tbl %>%
-    ggplot(aes(x = date, y = value - .pred)) +
-    geom_hline(yintercept = 0, color = "red") +
-    geom_point(color = palette_light()[[1]], alpha = 0.5) +
-    geom_smooth() +
-    theme_tq() +
-    labs(title = "Test Set: GLM Model Residuals", x = "") +
-    scale_y_continuous(limits = c(-5000, 5000))
+calibration_table %>%
+  modeltime_accuracy() %>%
+  table_modeltime_accuracy(.interactive = interactive)
 
 ## -----------------------------------------------------------------------------
-# Extract bikes index
-idx <- bikes_tbl %>% tk_index()
-
-# Get time series summary from index
-bikes_summary <- idx %>% tk_get_timeseries_summary()
-
-## -----------------------------------------------------------------------------
-bikes_summary[1:6]
-
-## -----------------------------------------------------------------------------
-bikes_summary[7:12]
-
-## -----------------------------------------------------------------------------
-idx_future <- idx %>% tk_make_future_timeseries(length_out = 180)
-
-future_tbl <- tibble(date = idx_future) 
-
-future_tbl
-
-## -----------------------------------------------------------------------------
-future_predictions_tbl <- workflow_glmnet %>% 
-    fit(data = bikes_tbl) %>%
-    predict(future_tbl) %>%
-    bind_cols(future_tbl)
-
-## -----------------------------------------------------------------------------
-bikes_tbl %>%
-    ggplot(aes(x = date, y = value)) +
-    geom_rect(xmin = as.numeric(ymd("2012-07-01")),
-              xmax = as.numeric(ymd("2013-01-01")),
-              ymin = 0, ymax = 10000,
-              fill = palette_light()[[4]], alpha = 0.01) +
-    geom_rect(xmin = as.numeric(ymd("2013-01-01")),
-              xmax = as.numeric(ymd("2013-07-01")),
-              ymin = 0, ymax = 10000,
-              fill = palette_light()[[3]], alpha = 0.01) +
-    annotate("text", x = ymd("2011-10-01"), y = 7800,
-             color = palette_light()[[1]], label = "Train Region") +
-    annotate("text", x = ymd("2012-10-01"), y = 1550,
-             color = palette_light()[[1]], label = "Test Region") +
-    annotate("text", x = ymd("2013-4-01"), y = 1550,
-             color = palette_light()[[1]], label = "Forecast Region") +
-    geom_point(alpha = 0.5, color = palette_light()[[1]]) +
-    # future data
-    geom_point(aes(x = date, y = .pred), data = future_predictions_tbl,
-               alpha = 0.5, color = palette_light()[[2]]) +
-    geom_smooth(aes(x = date, y = .pred), data = future_predictions_tbl,
-                method = 'loess') + 
-    labs(title = "Bikes Sharing Dataset: 6-Month Forecast", x = "") +
-    theme_tq()
-    
-
-## -----------------------------------------------------------------------------
-# Calculate standard deviation of residuals
-test_resid_sd <- prediction_tbl %>%
-    summarize(stdev = sd(value - .pred))
-
-future_predictions_tbl <- future_predictions_tbl %>%
-    mutate(
-        lo.95 = .pred - 1.96 * test_resid_sd$stdev,
-        lo.80 = .pred - 1.28 * test_resid_sd$stdev,
-        hi.80 = .pred + 1.28 * test_resid_sd$stdev,
-        hi.95 = .pred + 1.96 * test_resid_sd$stdev
-    )
-
-## -----------------------------------------------------------------------------
-bikes_tbl %>%
-    ggplot(aes(x = date, y = value)) +
-    geom_point(alpha = 0.5, color = palette_light()[[1]]) +
-    geom_ribbon(aes(y = .pred, ymin = lo.95, ymax = hi.95), 
-                data = future_predictions_tbl, 
-                fill = "#D5DBFF", color = NA, size = 0) +
-    geom_ribbon(aes(y = .pred, ymin = lo.80, ymax = hi.80, fill = key), 
-                data = future_predictions_tbl,
-                fill = "#596DD5", color = NA, size = 0, alpha = 0.8) +
-    geom_point(aes(x = date, y = .pred), data = future_predictions_tbl,
-               alpha = 0.5, color = palette_light()[[2]]) +
-    geom_smooth(aes(x = date, y = .pred), data = future_predictions_tbl,
-                method = 'loess', color = "white") + 
-    labs(title = "Bikes Sharing Dataset: 6-Month Forecast with Prediction Intervals", x = "") +
-    theme_tq()
+calibration_table %>%
+  modeltime_refit(bike_transactions_tbl) %>%
+  modeltime_forecast(h = "12 months", actual_data = bike_transactions_tbl) %>%
+  plot_modeltime_forecast(.interactive = interactive)
 
 ## ---- echo=FALSE--------------------------------------------------------------
 knitr::include_graphics("time_series_course.jpg")

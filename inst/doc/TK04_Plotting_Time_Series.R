@@ -6,10 +6,13 @@ knitr::opts_chunk$set(
   fig.height = 4.5,
   fig.align = 'center',
   out.width='95%', 
-  dpi = 100,
+  dpi = 70,
   collapse = TRUE,
   comment = "#>"
 )
+
+## ---- echo=FALSE--------------------------------------------------------------
+knitr::include_graphics("timetk_version_2.jpg")
 
 ## ----setup--------------------------------------------------------------------
 library(tidyverse)
@@ -43,8 +46,8 @@ m4_hourly %>% group_by(id)
 
 ## -----------------------------------------------------------------------------
 m4_hourly %>%
+  group_by(id) %>%
   plot_time_series(date, log(value),             # Apply a Log Transformation
-                   id,                           # Faceting (Group) 
                    .color_var = week(date),      # Color applied to Week transformation
                    # Facet formatting
                    .facet_ncol = 2, 

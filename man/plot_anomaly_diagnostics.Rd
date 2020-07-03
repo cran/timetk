@@ -8,7 +8,7 @@ plot_anomaly_diagnostics(
   .data,
   .date_var,
   .value,
-  ...,
+  .facet_vars = NULL,
   .frequency = "auto",
   .trend = "auto",
   .alpha = 0.05,
@@ -23,8 +23,9 @@ plot_anomaly_diagnostics(
   .anom_color = "#e31a1c",
   .anom_alpha = 1,
   .anom_size = 1.5,
-  .ribbon_fill = "grey70",
-  .ribbon_alpha = 1,
+  .ribbon_fill = "grey20",
+  .ribbon_alpha = 0.2,
+  .legend_show = TRUE,
   .title = "Anomaly Diagnostics",
   .x_lab = "",
   .y_lab = "",
@@ -39,7 +40,7 @@ plot_anomaly_diagnostics(
 
 \item{.value}{A column containing numeric values}
 
-\item{...}{One or more grouping columns that broken out into \code{ggplot2} facets.
+\item{.facet_vars}{One or more grouping columns that broken out into \code{ggplot2} facets.
 These can be selected using \code{tidyselect()} helpers (e.g \code{contains()}).}
 
 \item{.frequency}{Controls the seasonal adjustment (removal of seasonality).
@@ -80,6 +81,8 @@ and trend selection (if applicable).}
 \item{.ribbon_fill}{Fill color for the acceptable range}
 
 \item{.ribbon_alpha}{Fill opacity for the acceptable range. Range: (0, 1).}
+
+\item{.legend_show}{Toggles on/off the Legend}
 
 \item{.title}{Plot title.}
 

@@ -7,7 +7,7 @@
 #' @param .data A `tibble` or `data.frame` with a time-based column
 #' @param .date_var A column containing either date or date-time values
 #' @param .value A column containing numeric values
-#' @param ... One or more grouping columns that broken out into `ggplot2` facets.
+#' @param .facet_vars One or more grouping columns that broken out into `ggplot2` facets.
 #'  These can be selected using `tidyselect()` helpers (e.g `contains()`).
 #' @param .facet_ncol Number of facet columns.
 #' @param .facet_scales Control facet x & y-axis ranges. Options include "fixed", "free", "free_y", "free_x"
@@ -20,6 +20,7 @@
 #' @param .anom_size Size for the anomaly dots
 #' @param .ribbon_fill Fill color for the acceptable range
 #' @param .ribbon_alpha Fill opacity for the acceptable range. Range: (0, 1).
+#' @param .legend_show Toggles on/off the Legend
 #' @param .title Plot title.
 #' @param .x_lab Plot x-axis label
 #' @param .y_lab Plot y-axis label
@@ -103,7 +104,7 @@
 #'
 #' @name plot_anomaly_diagnostics
 #' @export
-plot_anomaly_diagnostics <- function(.data, .date_var, .value, ...,
+plot_anomaly_diagnostics <- function(.data, .date_var, .value, .facet_vars = NULL,
 
                                      .frequency = "auto", .trend = "auto",
                                      .alpha = 0.05, .max_anomalies = 0.2,
@@ -117,7 +118,9 @@ plot_anomaly_diagnostics <- function(.data, .date_var, .value, ...,
                                      .anom_color = "#e31a1c",
                                      .anom_alpha = 1, .anom_size = 1.5,
 
-                                     .ribbon_fill = "grey70", .ribbon_alpha = 1,
+                                     .ribbon_fill = "grey20", .ribbon_alpha = 0.20,
+
+                                     .legend_show = TRUE,
 
                                      .title = "Anomaly Diagnostics",
                                      .x_lab = "", .y_lab = "",
@@ -144,7 +147,7 @@ plot_anomaly_diagnostics <- function(.data, .date_var, .value, ...,
 }
 
 #' @export
-plot_anomaly_diagnostics.data.frame <- function(.data, .date_var, .value, ...,
+plot_anomaly_diagnostics.data.frame <- function(.data, .date_var, .value, .facet_vars = NULL,
 
                                                 .frequency = "auto", .trend = "auto",
                                                 .alpha = 0.05, .max_anomalies = 0.2,
@@ -158,7 +161,9 @@ plot_anomaly_diagnostics.data.frame <- function(.data, .date_var, .value, ...,
                                                 .anom_color = "#e31a1c",
                                                 .anom_alpha = 1, .anom_size = 1.5,
 
-                                                .ribbon_fill = "grey70", .ribbon_alpha = 1,
+                                                .ribbon_fill = "grey20", .ribbon_alpha = 0.20,
+
+                                                .legend_show = TRUE,
 
                                                 .title = "Anomaly Diagnostics",
                                                 .x_lab = "", .y_lab = "",
@@ -169,7 +174,10 @@ plot_anomaly_diagnostics.data.frame <- function(.data, .date_var, .value, ...,
     # Tidy Eval Setup
     value_expr    <- rlang::enquo(.value)
     date_var_expr <- rlang::enquo(.date_var)
-    facets_expr   <- rlang::enquos(...)
+    facets_expr   <- rlang::enquo(.facet_vars)
+
+    # Facet Names
+    facets_expr <- rlang::syms(names(tidyselect::eval_select(facets_expr, .data)))
 
     data_formatted      <- tibble::as_tibble(.data)
     .facet_collapse     <- TRUE
@@ -247,6 +255,11 @@ plot_anomaly_diagnostics.data.frame <- function(.data, .date_var, .value, ...,
                             data = . %>% dplyr::filter(anomaly == "Yes")) +
         ggplot2::scale_color_manual(values = c("Yes" = .anom_color))
 
+    # Show Legend?
+    if (!.legend_show) {
+        g <- g +
+            ggplot2::theme(legend.position = "none")
+    }
 
     # Convert to interactive if selected
     if (.interactive) {
@@ -258,7 +271,7 @@ plot_anomaly_diagnostics.data.frame <- function(.data, .date_var, .value, ...,
 }
 
 #' @export
-plot_anomaly_diagnostics.grouped_df <- function(.data, .date_var, .value, ...,
+plot_anomaly_diagnostics.grouped_df <- function(.data, .date_var, .value, .facet_vars = NULL,
 
                                                 .frequency = "auto", .trend = "auto",
                                                 .alpha = 0.05, .max_anomalies = 0.2,
@@ -272,7 +285,9 @@ plot_anomaly_diagnostics.grouped_df <- function(.data, .date_var, .value, ...,
                                                 .anom_color = "#e31a1c",
                                                 .anom_alpha = 1, .anom_size = 1.5,
 
-                                                .ribbon_fill = "grey70", .ribbon_alpha = 1,
+                                                .ribbon_fill = "grey20", .ribbon_alpha = 0.20,
+
+                                                .legend_show = TRUE,
 
                                                 .title = "Anomaly Diagnostics",
                                                 .x_lab = "", .y_lab = "",
@@ -283,7 +298,7 @@ plot_anomaly_diagnostics.grouped_df <- function(.data, .date_var, .value, ...,
 
     # Tidy Eval Setup
     group_names   <- dplyr::group_vars(.data)
-    facets_expr   <- rlang::enquos(...)
+    facets_expr   <- rlang::enquos(.facet_vars)
 
     # Checks
     facet_names <- .data %>% dplyr::ungroup() %>% dplyr::select(!!! facets_expr) %>% colnames()
@@ -302,7 +317,8 @@ plot_anomaly_diagnostics.grouped_df <- function(.data, .date_var, .value, ...,
         .value              = !! rlang::enquo(.value),
 
         # ...
-        !!! rlang::syms(group_names),
+        # !!! rlang::syms(group_names),
+        .facet_vars         = !! enquo(group_names),
 
         .frequency          = .frequency,
         .trend              = .trend,
@@ -324,6 +340,8 @@ plot_anomaly_diagnostics.grouped_df <- function(.data, .date_var, .value, ...,
 
         .ribbon_fill        = .ribbon_fill,
         .ribbon_alpha       = .ribbon_alpha,
+
+        .legend_show        = .legend_show,
 
         .title              = .title,
         .x_lab              = .x_lab,

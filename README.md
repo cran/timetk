@@ -3,7 +3,7 @@
 
 # timetk
 
-<!-- <img src="man/figures/logo.png" width="147" height="170" align="right" />-->
+<img src="man/figures/logo.png" width="147" height="170" align="right" />
 
 [![Travis build
 status](https://travis-ci.org/business-science/timetk.svg?branch=master)](https://travis-ci.org/business-science/timetk)
@@ -18,6 +18,8 @@ status](https://travis-ci.org/business-science/timetk.svg?branch=master)](https:
 
 To make it easy to ***visualize, wrangle and preprocess time series
 data*** for forecasting and machine learning prediction.
+
+![](vignettes/timetk_version_2.jpg)<!-- -->
 
 ## Documentation
 
@@ -86,7 +88,7 @@ taylor_30_min %>%
                      .interactive = FALSE, .color_lab = "Week")
 ```
 
-![](man/figures/README-unnamed-chunk-3-1.png)<!-- -->
+![](man/figures/README-unnamed-chunk-4-1.png)<!-- -->
 
 Visualize anomalies…
 
@@ -96,7 +98,7 @@ walmart_sales_weekly %>%
                              .facet_ncol = 3, .interactive = FALSE)
 ```
 
-![](man/figures/README-unnamed-chunk-4-1.png)<!-- -->
+![](man/figures/README-unnamed-chunk-5-1.png)<!-- -->
 
 Make a seasonality plot…
 
@@ -105,7 +107,7 @@ taylor_30_min %>%
     plot_seasonal_diagnostics(date, value, .interactive = FALSE)
 ```
 
-![](man/figures/README-unnamed-chunk-5-1.png)<!-- -->
+![](man/figures/README-unnamed-chunk-6-1.png)<!-- -->
 
 Inspect autocorrelation, partial autocorrelation (and cross correlations
 too)…
@@ -115,7 +117,7 @@ taylor_30_min %>%
     plot_acf_diagnostics(date, value, .lags = "1 week", .interactive = FALSE)
 ```
 
-![](man/figures/README-unnamed-chunk-6-1.png)<!-- -->
+![](man/figures/README-unnamed-chunk-7-1.png)<!-- -->
 
 ## Installation
 
@@ -196,6 +198,8 @@ If you are interested in learning from my advanced **Time Series
 Analysis & Forecasting Course**, then [join my
 waitlist](https://mailchi.mp/business-science/time-series-forecasting-course-coming-soon).
 The course is coming soon.
+
+![](vignettes/time_series_course.jpg)<!-- -->
 
 You will learn:
 

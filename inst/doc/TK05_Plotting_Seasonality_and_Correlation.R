@@ -6,7 +6,7 @@ knitr::opts_chunk$set(
   fig.height = 4.5,
   fig.align = 'center',
   out.width='95%', 
-  dpi = 100,
+  dpi = 70,
   collapse = TRUE,
   comment = "#>"
 )
@@ -33,7 +33,7 @@ walmart_sales_weekly %>%
     group_by(id) %>%
     plot_acf_diagnostics(
         Date, Weekly_Sales,        # ACF & PACF
-        Temperature, Fuel_Price,   # CCFs
+        .ccf_vars    = c(Temperature, Fuel_Price),   # CCFs
         .lags        = "3 months",    # 3 months of weekly lags
         .interactive = interactive
     )

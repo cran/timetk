@@ -21,7 +21,43 @@ __New Tune Parameter Ranking and Selection Tools__:
 
 -->
 
-# timetk 1.0.0.9000
+# timetk 2.1.0.9000 (Development Version)
+
+# timetk 2.1.0 
+
+__New Functions__
+
+* `plot_time_series_regression()`: Convenience function to visualize & explore features using Linear Regression (`stats::lm()` formula).
+* `time_series_split()`: A convenient way to return a single split from `time_series_cv()`. Returns the split in the same format as `rsample::initial_time_split()`.
+
+__Improvements__
+
+* __Auto-detect date and date-time__: Affects `summarise_by_time()`, `filter_by_time()`, `tk_summary_diagnostics`
+* `tk_time_series_cv_plan()`: Allow a single resample from `rsample::initial_time_split` or `timetk::time_series_split`
+* __Updated Vignette:__ The vignette, "Forecasting Using the Time Series Signature", has been updated with `modeltime` and `tidymodels`. 
+
+__Plotting Improvements__
+
+* __All plotting functions now support Tab Completion__ (a minor breaking change was needed to do so, see breaking changes below)
+* `plot_time_series()`: 
+    - Add `.legend_show` to toggle on/off legends. 
+    - Permit numeric index (fix issue with smoother failing)
+
+
+__Breaking Changes__
+
+* __Tab Completion__: Replace `...` with `.facet_vars` or `.ccf_vars`. This change is needed to improve tab-completion. It affects : 
+    - `plot_time_series()`
+    - `plot_acf_diagnostics()`
+    - `plot_anomaly_diagnostics()`
+    - `plot_seasonal_diagnostics()`
+    - `plot_stl_diagnostics()`
+    
+__Bug Fixes__
+
+- `fourier_vec()` and `step_fourier_vec()`: Add error if observations have zero difference. [Issue #40.](https://github.com/business-science/timetk/issues/40)
+
+# timetk 2.0.0
 
 __New Interactive Plotting Functions__
 
