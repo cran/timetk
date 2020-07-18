@@ -21,7 +21,17 @@ __New Tune Parameter Ranking and Selection Tools__:
 
 -->
 
-# timetk 2.1.0.9000 (Development Version)
+# timetk 2.2.0 
+
+__New Functions__
+
+- `mutate_by_time()`: For applying mutates by time windows
+- `log_interval_vec()` & `log_interval_inv_vec()`: For constrained interval forecasting. 
+
+__Improvements__
+
+- `plot_acf_diagnostics()`: A new argument, `.show_white_noise_bars` for adding white noise bars to an ACF / PACF Plot.
+- `pad_by_time()`: New arguments `.start_date` and `.end_date` for expanding/contracting the padding windows. 
 
 # timetk 2.1.0 
 

@@ -6,13 +6,10 @@ knitr::opts_chunk$set(
   fig.height = 4.5,
   fig.align = 'center',
   out.width='95%', 
-  dpi = 70,
+  dpi = 100,
   collapse = TRUE,
   comment = "#>"
 )
-
-## ---- echo=FALSE--------------------------------------------------------------
-knitr::include_graphics("timetk_version_2.jpg")
 
 ## ----setup--------------------------------------------------------------------
 library(tidyverse)
