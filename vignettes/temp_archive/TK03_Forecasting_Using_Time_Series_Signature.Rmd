@@ -42,7 +42,7 @@ library(tidyverse)
 library(timetk)
 
 # Used to convert plots from interactive to static
-interactive <- FALSE
+interactive = TRUE
 ```
 
 # Data

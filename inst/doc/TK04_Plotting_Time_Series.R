@@ -11,6 +11,9 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 
+## ---- echo=FALSE--------------------------------------------------------------
+knitr::include_graphics("timetk_version_2.jpg")
+
 ## ----setup--------------------------------------------------------------------
 library(tidyverse)
 library(lubridate)
