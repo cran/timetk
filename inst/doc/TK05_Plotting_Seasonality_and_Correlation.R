@@ -56,6 +56,3 @@ m4_hourly %>%
         .feature_set = c("observed", "season", "trend", "remainder"),
         .interactive = interactive)
 
-## ---- echo=FALSE--------------------------------------------------------------
-knitr::include_graphics("time_series_course.jpg")
-

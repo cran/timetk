@@ -9,6 +9,8 @@
 #' @param .by Either "auto", a time-based frequency like "year", "month", "day", "hour", etc,
 #'  or a time expression like "5 min", or "7 days". See Details.
 #' @param .pad_value Fills in padded values. Default is `NA`.
+#' @param .fill_na_direction Users can provide an `NA` fill strategy using `tidyr::fill()`.
+#'  Possible values: `'none'`, `'down'`, `'up'`, `'downup'`, `'updown'`. Default: `'none'`
 #' @param .start_date Specifies the start of the padded series.
 #'  If NULL it will use the lowest value of the input variable.
 #' @param .end_date  Specifies the end of the padded series.
@@ -86,14 +88,33 @@
 #' missing_data_tbl %>%
 #'    pad_by_time(date, .by = "quarter", .start_date = "2013", .end_date = "2015-07-01")
 #'
+#' # Can specify a tidyr::fill() direction
+#' missing_data_tbl %>%
+#'    pad_by_time(date, .by = "quarter",
+#'                .fill_na_direction = "downup",
+#'                .start_date = "2013", .end_date = "2015-07-01")
+#'
 #' # --- GROUPS ----
+#'
+#' # Apply standard NA padding to groups
 #' FANG %>%
 #'     group_by(symbol) %>%
 #'     pad_by_time(.by = "day")
 #'
+#' # Apply filled padding to groups
+#' FANG %>%
+#'     group_by(symbol) %>%
+#'     pad_by_time(.by = "day", .fill_na_direction = "down")
+#'
 #' @name pad_by_time
 #' @export
-pad_by_time <- function(.data, .date_var, .by = "auto", .pad_value = NA, .start_date = NULL, .end_date = NULL) {
+pad_by_time <- function(.data, .date_var, .by = "auto",
+                        .pad_value = NA, .fill_na_direction = c("none", "down", "up", "downup", "updown"),
+                        .start_date = NULL, .end_date = NULL) {
+
+    if (!tolower(.fill_na_direction[1]) %in% c("none", "down", "up", "downup", "updown")) {
+        rlang::abort("'.fill_na_direction' must be one of c('none', 'down', 'up', 'downup', 'updown')")
+    }
 
     if (rlang::quo_is_missing(rlang::enquo(.date_var))) {
         message(".date_var is missing. Using: ", tk_get_timeseries_variables(.data)[1])
@@ -103,18 +124,29 @@ pad_by_time <- function(.data, .date_var, .by = "auto", .pad_value = NA, .start_
 }
 
 #' @export
-pad_by_time.default <- function(.data, .date_var, .by = "auto", .pad_value = NA, .start_date = NULL, .end_date = NULL) {
+pad_by_time.default <- function(.data, .date_var, .by = "auto",
+                                .pad_value = NA, .fill_na_direction = c("none", "down", "up", "downup", "updown"),
+                                .start_date = NULL, .end_date = NULL) {
     rlang::abort("Sorry, no method for class, ", class(.data)[1])
 }
 
 #' @export
-pad_by_time.data.frame <- function(.data, .date_var, .by = "auto", .pad_value = NA, .start_date = NULL, .end_date = NULL) {
-    padder(.data = .data, .date_var = !! enquo(.date_var), .by = .by, .pad_value = .pad_value,
-           .start_date = .start_date, .end_date = .end_date)
+pad_by_time.data.frame <- function(.data, .date_var, .by = "auto",
+                                   .pad_value = NA, .fill_na_direction = c("none", "down", "up", "downup", "updown"),
+                                   .start_date = NULL, .end_date = NULL) {
+    padder(.data = .data,
+           .date_var          = !! enquo(.date_var),
+           .by                = .by,
+           .pad_value         = .pad_value,
+           .fill_na_direction = .fill_na_direction,
+           .start_date        = .start_date,
+           .end_date          = .end_date)
 }
 
 #' @export
-pad_by_time.grouped_df <- function(.data, .date_var, .by = "auto", .pad_value = NA, .start_date = NULL, .end_date = NULL) {
+pad_by_time.grouped_df <- function(.data, .date_var, .by = "auto",
+                                   .pad_value = NA, .fill_na_direction = c("none", "down", "up", "downup", "updown"),
+                                   .start_date = NULL, .end_date = NULL) {
 
     group_names <- dplyr::group_vars(.data)
     date_var_expr <- rlang::enquo(.date_var)
@@ -129,12 +161,13 @@ pad_by_time.grouped_df <- function(.data, .date_var, .by = "auto", .pad_value = 
         dplyr::mutate(nested.col = purrr::map(
             .x         = data,
             .f         = function(df) padder(
-                .data        = df,
-                .date_var    = !! date_var_expr,
-                .by          = .by,
-                .pad_value   = .pad_value,
-                .start_date  = .start_date,
-                .end_date    = .end_date
+                .data              = df,
+                .date_var          = !! date_var_expr,
+                .by                = .by,
+                .pad_value         = .pad_value,
+                .fill_na_direction = .fill_na_direction,
+                .start_date        = .start_date,
+                .end_date          = .end_date
             )
         )) %>%
         dplyr::select(-data) %>%
@@ -142,15 +175,33 @@ pad_by_time.grouped_df <- function(.data, .date_var, .by = "auto", .pad_value = 
         dplyr::group_by_at(.vars = group_names)
 }
 
+
 # UTILS ----
 
-padder <- function(.data, .date_var, .by = "auto", .pad_value = NA,
+parse_date_by <- function(.date, .by, idx) {
+    if (!is.null(.date)) {
+        if (is.null(.by)) {
+            if (inherits(idx, "POSIXct")) {
+                parse_datetime2(.date, tz = lubridate::tz(idx))
+            } else {
+                parse_date2(.date)
+            }
+        } else if (stringr::str_detect(.by, "(hour)|(min)|(sec)")) {
+            parse_datetime2(.date, tz = lubridate::tz(idx))
+        } else {
+            parse_date2(.date)
+        }
+    }
+}
+
+padder <- function(.data, .date_var, .by = "auto", .pad_value = NA, .fill_na_direction = "none",
                            .start_date = NULL, .end_date = NULL,
                            .group = NULL, .stop_padding_if = 10e6) {
 
     date_var_expr <- rlang::enquo(.date_var)
+    .fill_na_direction <- tolower(.fill_na_direction[1])
 
-    if (rlang::quo_is_missing(rlang::enquo(.date_var))) {
+    if (rlang::quo_is_missing(date_var_expr)) {
         date_var_expr <- rlang::sym(tk_get_timeseries_variables(.data)[1])
     }
 
@@ -160,34 +211,10 @@ padder <- function(.data, .date_var, .by = "auto", .pad_value = NA,
     if (.by == "auto") .by <- NULL
 
     # Convert Start Date
-    if (!is.null(.start_date)) {
-        if (is.null(.by)) {
-            if (inherits(idx, "POSIXct")) {
-                .start_date <- parse_datetime2(.start_date, tz = lubridate::tz(idx))
-            } else {
-                .start_date <- parse_date2(.start_date)
-            }
-        } else if (stringr::str_detect(.by, "(hour)|(min)|(sec)")) {
-            .start_date <- parse_datetime2(.start_date, tz = lubridate::tz(idx))
-        } else {
-            .start_date <- parse_date2(.start_date)
-        }
-    }
+    .start_date <- parse_date_by(.start_date, .by, idx)
 
     # Convert End Date
-    if (!is.null(.end_date)) {
-        if (is.null(.by)) {
-            if (inherits(idx, "POSIXct")) {
-                .end_date <- parse_datetime2(.start_date, tz = lubridate::tz(idx))
-            } else {
-                .end_date <- parse_date2(.end_date)
-            }
-        } else if (stringr::str_detect(.by, "(hour)|(min)|(sec)")) {
-            .end_date <- parse_datetime2(.end_date, tz = lubridate::tz(idx))
-        } else {
-            .end_date <- parse_date2(.end_date)
-        }
-    }
+    .end_date <- parse_date_by(.end_date, .by, idx)
 
     # Apply the padding
     ret <- .data %>%
@@ -217,9 +244,12 @@ padder <- function(.data, .date_var, .by = "auto", .pad_value = NA,
     ret <- ret %>%
         dplyr::select(-check_missing)
 
+    # Fill NA
+    if (.fill_na_direction != "none") {
+        ret <- ret %>%
+            tidyr::fill(dplyr::everything(), .direction = .fill_na_direction)
+    }
+
     return(ret)
 
 }
-
-
-

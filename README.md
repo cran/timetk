@@ -3,7 +3,7 @@
 
 # timetk
 
-<!-- <img src="man/figures/logo.png" width="147" height="170" align="right" /> -->
+<img src="man/figures/logo.png" width="147" height="170" align="right" />
 
 [![Travis build
 status](https://travis-ci.org/business-science/timetk.svg?branch=master)](https://travis-ci.org/business-science/timetk)
@@ -17,7 +17,21 @@ status](https://travis-ci.org/business-science/timetk.svg?branch=master)](https:
 To make it easy to ***visualize, wrangle, and feature engineer time
 series data*** for forecasting and machine learning prediction.
 
-## Documentation
+## Installation
+
+*Download the development version with latest features*:
+
+``` r
+remotes::install_github("business-science/timetk")
+```
+
+*Or, download CRAN approved version*:
+
+``` r
+install.packages("timetk")
+```
+
+## Getting Started
 
   - [Full Time Series Machine Learning and Feature Engineering
     Tutorial:](https://www.business-science.io/time-series/2020/03/18/time-series-machine-learning.html)
@@ -84,7 +98,7 @@ taylor_30_min %>%
                      .interactive = FALSE, .color_lab = "Week")
 ```
 
-![](man/figures/README-unnamed-chunk-3-1.png)<!-- -->
+![](man/figures/README-unnamed-chunk-5-1.png)<!-- -->
 
 Visualize anomalies…
 
@@ -95,7 +109,7 @@ walmart_sales_weekly %>%
                              .facet_ncol = 3, .interactive = FALSE)
 ```
 
-![](man/figures/README-unnamed-chunk-4-1.png)<!-- -->
+![](man/figures/README-unnamed-chunk-6-1.png)<!-- -->
 
 Make a seasonality plot…
 
@@ -104,7 +118,7 @@ taylor_30_min %>%
     plot_seasonal_diagnostics(date, value, .interactive = FALSE)
 ```
 
-![](man/figures/README-unnamed-chunk-5-1.png)<!-- -->
+![](man/figures/README-unnamed-chunk-7-1.png)<!-- -->
 
 Inspect autocorrelation, partial autocorrelation (and cross correlations
 too)…
@@ -114,23 +128,7 @@ taylor_30_min %>%
     plot_acf_diagnostics(date, value, .lags = "1 week", .interactive = FALSE)
 ```
 
-![](man/figures/README-unnamed-chunk-6-1.png)<!-- -->
-
-## Installation
-
-What are you waiting for? *Download the development version with latest
-features*:
-
-``` r
-# install.packages("devtools")
-devtools::install_github("business-science/timetk")
-```
-
-*Or, download CRAN approved version*:
-
-``` r
-install.packages("timetk")
-```
+![](man/figures/README-unnamed-chunk-8-1.png)<!-- -->
 
 ## Acknowledgements
 
@@ -189,29 +187,44 @@ series packages.
     package uses. A ton of inspiration for visuals came from using
     `TSstudio`.
 
-# Learning More
+## Learning More
 
-If you are interested in learning from my advanced **Time Series
-Analysis & Forecasting Course**, then [join my
-waitlist](https://mailchi.mp/business-science/time-series-forecasting-course-coming-soon).
-The course is coming soon.
+<a href="https://www.youtube.com/embed/elQb4VzRINg" target="_blank"><img src="http://img.youtube.com/vi/elQb4VzRINg/0.jpg" alt="Anomalize" width="100%" height="450"/></a>
 
-![](vignettes/time_series_course.jpg)<!-- -->
+[*My Talk on High-Performance Time Series
+Forecasting*](https://youtu.be/elQb4VzRINg)
 
+Time series is changing. **Businesses now need 10,000+ time series
+forecasts every day.** This is what I call a *High-Performance Time
+Series Forecasting System (HPTSF)* - Accurate, Robust, and Scalable
+Forecasting.
+
+**High-Performance Forecasting Systems will save companies MILLIONS of
+dollars.** Imagine what will happen to your career if you can provide
+your organization a “High-Performance Time Series Forecasting System”
+(HPTSF System).
+
+I teach how to build a HPTFS System in my **High-Performance Time Series
+Forecasting Course**. If interested in learning Scalable
+High-Performance Forecasting Strategies then [take my
+course](https://university.business-science.io/p/ds4b-203-r-high-performance-time-series-forecasting).
 You will learn:
 
+  - Time Series Machine Learning (cutting-edge) with `Modeltime` - 30+
+    Models (Prophet, ARIMA, XGBoost, Random Forest, & many more)
+  - NEW - Deep Learning with `GluonTS` (Competition Winners)
   - Time Series Preprocessing, Noise Reduction, & Anomaly Detection
   - Feature engineering using lagged variables & external regressors
   - Hyperparameter Tuning
   - Time series cross-validation
   - Ensembling Multiple Machine Learning & Univariate Modeling
     Techniques (Competition Winner)
-  - NEW - Deep Learning with RNNs (Competition Winner)
-  - and more\!
+  - Scalable Forecasting - Forecast 1000+ time series in parallel
+  - and more.
 
 <p class="text-center" style="font-size:30px;">
 
-<a href="https://mailchi.mp/business-science/time-series-forecasting-course-coming-soon">Signup
-for the Time Series Course waitlist</a>
+<a href="https://university.business-science.io/p/ds4b-203-r-high-performance-time-series-forecasting">Unlock
+the High-Performance Time Series Forecasting Course</a>
 
 </p>

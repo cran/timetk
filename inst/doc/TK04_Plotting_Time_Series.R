@@ -69,6 +69,3 @@ taylor_30_min %>%
                    .color_lab = "Month") +
   scale_y_continuous(labels = scales::comma_format())
 
-## ---- echo=FALSE--------------------------------------------------------------
-knitr::include_graphics("time_series_course.jpg")
-
