@@ -3,7 +3,7 @@
 \name{step_slidify}
 \alias{step_slidify}
 \alias{tidy.step_slidify}
-\title{Rolling Window Transformation}
+\title{Slidify Rolling Window Transformation}
 \usage{
 step_slidify(
   recipe,
@@ -11,6 +11,7 @@ step_slidify(
   period,
   .f,
   align = c("center", "left", "right"),
+  partial = FALSE,
   names = NULL,
   role = "predictor",
   trained = FALSE,
@@ -50,6 +51,9 @@ This is common for de-noising operations. See also \verb{[smooth_vec()]} for LOE
 \item \strong{Right:} \code{NA} or \code{.partial} values are added to the beginning to shif the series to the Right. This is common in
 Financial Applications such as moving average cross-overs.
 }}
+
+\item{partial}{Should the moving window be allowed to return partial (incomplete) windows instead of NA values.
+Set to FALSE by default, but can be switched to TRUE to remove NA's.}
 
 \item{names}{An optional character string that is the same
 length of the number of terms selected by \code{terms}. These will be
@@ -137,6 +141,7 @@ new_data <- FB_tbl \%>\%
     tail(90) \%>\%
     mutate(date = date \%>\% tk_make_future_timeseries(length_out = 90))
 
+# OVERWRITE EXISTING COLUMNS -----
 
 # Create a recipe object with a step_slidify
 rec_ma_50 <- recipe(adjusted ~ ., data = FB_tbl) \%>\%

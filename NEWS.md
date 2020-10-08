@@ -1,3 +1,12 @@
+# timetk 2.4.0
+
+- `step_slidify_agument()` - A variant of step slidify that adds multiple rolling columns inside of a recipe. 
+
+__Bug Fixes__
+
+- Add warning when `%+time` and `%-time%` return missing values
+- Fix issues with `tk_make_timeseries()` and `tk_make_future_timeseries()` providing odd results for regular time series. [GitHub Issue 60](https://github.com/business-science/timetk/issues/60)
+
 # timetk 2.3.0
 
 __New Functionality__
