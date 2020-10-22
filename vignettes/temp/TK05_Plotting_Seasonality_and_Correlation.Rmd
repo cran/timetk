@@ -38,7 +38,7 @@ library(tidyverse)
 library(timetk)
 
 # Setup for the plotly charts (# FALSE returns ggplots)
-interactive <- FALSE
+interactive <- TRUE
 ```
 
 # Correlation Plots

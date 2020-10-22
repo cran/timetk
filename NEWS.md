@@ -1,3 +1,15 @@
+# timetk 2.5.0
+
+__Improvements__
+
+- `time_series_cv()`: Now works with time series groups. This is great for working with panel data. 
+- `future_frame()`: Gets a new argument called `.bind_data`. When set to `TRUE`, it performs a data
+  binding operation with the incoming data and the future frame. 
+
+__Miscellaneous__
+
+- Tune startup messages (#63)
+
 # timetk 2.4.0
 
 - `step_slidify_agument()` - A variant of step slidify that adds multiple rolling columns inside of a recipe. 
