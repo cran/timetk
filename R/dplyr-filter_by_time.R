@@ -1,7 +1,7 @@
 #' Filter (for Time-Series Data)
 #'
-#' The easiest way to filter time-based tibbles using shorthand timeseries notation.
-#' See [between_time()] for the date and date-time vector implementation.
+#' The easiest way to filter time-based ___start/end ranges___ using shorthand timeseries notation.
+#' See [filter_period()] for applying filter expression by period (windows).
 #'
 #' @param .data A tibble with a time-based column.
 #' @param .date_var A column containing date or date-time values to filter.
@@ -45,12 +45,16 @@
 #'
 #' @seealso
 #'
-#' Other Time-Based dplyr functions:
+#' Time-Based dplyr functions:
 #'
 #' - [summarise_by_time()] - Easily summarise using a date column.
-#' - [filter_by_time()] - Quickly filter using date ranges.
-#' - [between_time()] - Range detection for date or date-time sequences.
+#' - [mutate_by_time()] - Simplifies applying mutations by time windows.
 #' - [pad_by_time()] - Insert time series rows with regularly spaced timestamps
+#' - [filter_by_time()] - Quickly filter using date ranges.
+#' - [filter_period()] - Apply filtering expressions inside periods (windows)
+#' - [slice_period()] - Apply slice inside periods (windows)
+#' - [condense_period()] - Convert to a different periodicity
+#' - [between_time()] - Range detection for date or date-time sequences.
 #' - [slidify()] - Turn any function into a sliding (rolling) function
 #'
 #' @references

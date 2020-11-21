@@ -17,8 +17,8 @@ If missing, attempts to auto-detect date column.}
 \item{.end_date}{The ending date for the filter sequence}
 }
 \description{
-The easiest way to filter time-based tibbles using shorthand timeseries notation.
-See \code{\link[=between_time]{between_time()}} for the date and date-time vector implementation.
+The easiest way to filter time-based \emph{\strong{start/end ranges}} using shorthand timeseries notation.
+See \code{\link[=filter_period]{filter_period()}} for applying filter expression by period (windows).
 }
 \details{
 \strong{Pure Time Series Filtering Flexibilty}
@@ -78,12 +78,16 @@ FANG \%>\%
 }
 }
 \seealso{
-Other Time-Based dplyr functions:
+Time-Based dplyr functions:
 \itemize{
 \item \code{\link[=summarise_by_time]{summarise_by_time()}} - Easily summarise using a date column.
-\item \code{\link[=filter_by_time]{filter_by_time()}} - Quickly filter using date ranges.
-\item \code{\link[=between_time]{between_time()}} - Range detection for date or date-time sequences.
+\item \code{\link[=mutate_by_time]{mutate_by_time()}} - Simplifies applying mutations by time windows.
 \item \code{\link[=pad_by_time]{pad_by_time()}} - Insert time series rows with regularly spaced timestamps
+\item \code{\link[=filter_by_time]{filter_by_time()}} - Quickly filter using date ranges.
+\item \code{\link[=filter_period]{filter_period()}} - Apply filtering expressions inside periods (windows)
+\item \code{\link[=slice_period]{slice_period()}} - Apply slice inside periods (windows)
+\item \code{\link[=condense_period]{condense_period()}} - Convert to a different periodicity
+\item \code{\link[=between_time]{between_time()}} - Range detection for date or date-time sequences.
 \item \code{\link[=slidify]{slidify()}} - Turn any function into a sliding (rolling) function
 }
 }

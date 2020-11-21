@@ -1,3 +1,19 @@
+# timetk 2.6.0
+
+__New Functions__
+
+- `filter_period()` (#64): Applies filtering expressions within time-based periods (windows). 
+- `slice_period()` (#64): Applies slices within time-based periods (windows).
+- `condense_period()` (#64): Converts a periodicity from a higher (e.g. daily) to lower (e.g. monthly) frequency. Similar to `xts::to.period()` and `tibbletime::as_period()`.
+- `tk_augment_leads()` and `lead_vec()` (#65): Added to make it easier / more obvious on how to create leads. 
+
+__Fixes__
+
+- `time_series_cv()`: Fix bug with Panel Data. Train/Test Splits only returning 1st observation in final time stamp. Should return all observations. 
+- `future_frame()` and `tk_make_future_timeseries()`: Now sort the incoming index to ensure dates returned go into the future. 
+- `tk_augment_lags()` and `tk_augment_slidify()`: Now overwrite column names to match the behavior of `tk_augment_fourier()` and `tk_augment_differences()`.
+
+
 # timetk 2.5.0
 
 __Improvements__
@@ -12,11 +28,11 @@ __Miscellaneous__
 
 # timetk 2.4.0
 
-- `step_slidify_agument()` - A variant of step slidify that adds multiple rolling columns inside of a recipe. 
+- `step_slidify_augment()` - A variant of step slidify that adds multiple rolling columns inside of a recipe. 
 
 __Bug Fixes__
 
-- Add warning when `%+time` and `%-time%` return missing values
+- Add warning when `%+time%` and `%-time%` return missing values
 - Fix issues with `tk_make_timeseries()` and `tk_make_future_timeseries()` providing odd results for regular time series. [GitHub Issue 60](https://github.com/business-science/timetk/issues/60)
 
 # timetk 2.3.0

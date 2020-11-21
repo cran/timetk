@@ -59,9 +59,12 @@
 #' Time-Based dplyr functions:
 #'
 #' - [summarise_by_time()] - Easily summarise using a date column.
+#' - [mutate_by_time()] - Simplifies applying mutations by time windows.
 #' - [filter_by_time()] - Quickly filter using date ranges.
+#' - [filter_period()] - Apply filtering expressions inside periods (windows)
 #' - [between_time()] - Range detection for date or date-time sequences.
 #' - [pad_by_time()] - Insert time series rows with regularly spaced timestamps
+#' - [condense_period()] - Convert to a different periodicity
 #' - [slidify()] - Turn any function into a sliding (rolling) function
 #'
 #' @examples
@@ -133,6 +136,12 @@ summarise_by_time.data.frame <- function(.data, .date_var, .by = "day", ...,
     if (rlang::quo_is_missing(date_var_expr)) {
         date_var_text <- tk_get_timeseries_variables(.data)[1]
         date_var_expr <- rlang::sym(date_var_text)
+    }
+
+    # Check index exists
+    date_var_text <- rlang::quo_name(date_var_expr)
+    if (!date_var_text %in% names(.data)) {
+        rlang::abort(stringr::str_glue("Attempting to use .date_var = {date_var_text}. Column does not exist in .data. Please specify a date or date-time column."))
     }
 
     # Choose lubridate function
