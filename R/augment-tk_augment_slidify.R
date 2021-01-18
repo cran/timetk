@@ -4,7 +4,8 @@
 #' Works with `dplyr` groups too.
 #'
 #' @param .data A tibble.
-#' @param .value A numeric column to have a rolling window transformation applied
+#' @param .value One or more column(s) to have a transformation applied. Usage
+#'  of `tidyselect` functions (e.g. `contains()`) can be used to select multiple columns.
 #' @param .period One or more periods for the rolling window(s)
 #' @param .f A summary `[function / formula]`,
 #' @param ... Optional arguments for the summary function
@@ -44,17 +45,31 @@
 #' library(tidyquant)
 #' library(timetk)
 #'
+#' # Single Column | Multiple Rolling Windows
 #' FANG %>%
 #'     select(symbol, date, adjusted) %>%
 #'     group_by(symbol) %>%
 #'     tk_augment_slidify(
-#'         .value  = adjusted,
+#'         .value   = contains("adjust"),
 #'         # Multiple rolling windows
 #'         .period  = c(10, 30, 60, 90),
 #'         .f       = AVERAGE,
 #'         .partial = TRUE,
 #'         .names   = str_c("MA_", c(10, 30, 60, 90))
-#'     )
+#'     ) %>%
+#'     ungroup()
+#'
+#' # Multiple Columns | Multiple Rolling Windows
+#' FANG %>%
+#'     select(symbol, date, adjusted, volume) %>%
+#'     group_by(symbol) %>%
+#'     tk_augment_slidify(
+#'         .value  = c(adjusted, volume),
+#'         .period  = c(10, 30, 60, 90),
+#'         .f       = AVERAGE,
+#'         .partial = TRUE
+#'     ) %>%
+#'     ungroup()
 #'
 #' @name tk_augment_slidify
 NULL
@@ -62,59 +77,76 @@ NULL
 #' @export
 #' @rdname tk_augment_slidify
 tk_augment_slidify <- function(.data,
-                                  .value,
-                                  .period,
-                                  .f,
-                                  ...,
-                                  .align = c("center", "left", "right"),
-                                  .partial = FALSE,
-                                  .names = "auto") {
+                               .value,
+                               .period,
+                               .f,
+                               ...,
+                               .align = c("center", "left", "right"),
+                               .partial = FALSE,
+                               .names = "auto") {
+
+    # Tidy Eval Setup
+    column_expr <- enquo(.value)
+
+    # Checks
+    if (rlang::quo_is_missing(column_expr)) stop(call. = FALSE, "tk_augment_slidify(.value) is missing.")
+    if (rlang::is_missing(.period)) stop(call. = FALSE, "tk_augment_slidify(.period) is missing.")
+    if (rlang::is_missing(.f)) stop(call. = FALSE, "tk_augment_slidify(.f) is missing.")
+
     UseMethod("tk_augment_slidify", .data)
 }
 
 #' @export
 tk_augment_slidify.data.frame <- function(.data,
-                                             .value,
-                                             .period,
-                                             .f,
-                                             ...,
-                                             .align = c("center", "left", "right"),
-                                             .partial = FALSE,
-                                             .names = "auto") {
+                                          .value,
+                                          .period,
+                                          .f,
+                                          ...,
+                                          .align = c("center", "left", "right"),
+                                          .partial = FALSE,
+                                          .names = "auto") {
 
-    column_expr <- enquo(.value)
+    # column_expr <- enquo(.value)
+    col_nms   <- names(tidyselect::eval_select(rlang::enquo(.value), .data))
+    col_exprs <- rlang::syms(col_nms)
 
-    if (rlang::quo_is_missing(column_expr)) stop(call. = FALSE, "tk_augment_slidify(.value) is missing.")
-    if (rlang::is_missing(.period)) stop(call. = FALSE, "tk_augment_slidify(.period) is missing.")
-    if (rlang::is_missing(.f)) stop(call. = FALSE, "tk_augment_slidify(.f) is missing.")
+    # print(col_nms)
+    # print(.period)
+
+    grid <- purrr::cross_df(
+        .l = list(
+            col   = col_nms,
+            per   = .period
+        )
+    )
+
+    # print(grid)
 
     ret_1 <- .data
 
-    ret_2 <- .period %>%
-        purrr::map_dfc(.f = function(period) {
-            .data %>%
-                dplyr::pull(!! column_expr) %>%
-                slidify_vec(
-                    .period  = period,
-                    .f       = .f,
-                    ...,
-                    .align   = .align[1],
-                    .partial = .partial[1]
-                )
-        })
+    ret_2 <- purrr::map2(.x = grid$col, .y = grid$per, .f = function(col, per) {
+        .data %>%
+            dplyr::pull(!! rlang::sym(col)) %>%
+            slidify_vec(
+                .period  = per,
+                .f       = .f,
+                ...,
+                .align   = .align[1],
+                .partial = .partial[1]
+            )
+    })
 
     # Adjust Names
     if (any(.names == "auto")) {
-        grid <- expand.grid(
-            col         = rlang::quo_name(column_expr),
-            period_val  = .period,
-            stringsAsFactors = FALSE)
-        newname <- paste0(grid$col, "_roll_", grid$period_val)
+        newname <- paste0(grid$col, "_roll_", grid$per)
     } else {
         newname <- .names
     }
     ret_2 <- ret_2 %>%
-        purrr::set_names(newname)
+        purrr::set_names(newname) %>%
+        dplyr::bind_cols()
+
+    # print(ret_2)
 
     # Perform Overwrite
     ret <- bind_cols_overwrite(ret_1, ret_2)
@@ -125,22 +157,17 @@ tk_augment_slidify.data.frame <- function(.data,
 
 #' @export
 tk_augment_slidify.grouped_df <- function(.data,
-                                             .value,
-                                             .period,
-                                             .f,
-                                             ...,
-                                             .align = c("center", "left", "right"),
-                                             .partial = FALSE,
-                                             .names = "auto") {
+                                          .value,
+                                          .period,
+                                          .f,
+                                          ...,
+                                          .align = c("center", "left", "right"),
+                                          .partial = FALSE,
+                                          .names = "auto") {
 
-    # Tidy Eval Setup
-    column_expr <- enquo(.value)
+    # col_nms     <- names(tidyselect::eval_select(rlang::enquo(.value), .data))
+    # col_exprs   <- rlang::syms(col_nms)
     group_names <- dplyr::group_vars(.data)
-
-    # Checks
-    if (rlang::quo_is_missing(column_expr)) stop(call. = FALSE, "tk_augment_slidify(.value) is missing.")
-    if (rlang::is_missing(.period)) stop(call. = FALSE, "tk_augment_slidify(.period) is missing.")
-    if (rlang::is_missing(.f)) stop(call. = FALSE, "tk_augment_slidify(.f) is missing.")
 
     .data %>%
         tidyr::nest() %>%
@@ -148,7 +175,7 @@ tk_augment_slidify.grouped_df <- function(.data,
             .x         = data,
             .f         = function(df) tk_augment_slidify(
                 .data      = df,
-                .value     = !! enquo(.value),
+                .value     = !! rlang::enquo(.value),
                 .period    = .period,
                 .f         = .f,
                 ...,
@@ -165,12 +192,12 @@ tk_augment_slidify.grouped_df <- function(.data,
 
 #' @export
 tk_augment_slidify.default <- function(.data,
-                                          .value,
-                                          .period,
-                                          .f,
-                                          ...,
-                                          .align = c("center", "left", "right"),
-                                          .partial = FALSE,
-                                          .names = "auto") {
+                                       .value,
+                                       .period,
+                                       .f,
+                                       ...,
+                                       .align = c("center", "left", "right"),
+                                       .partial = FALSE,
+                                       .names = "auto") {
     stop(paste0("`tk_augment_slidify` has no method for class ", class(data)[[1]]))
 }

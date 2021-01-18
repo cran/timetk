@@ -1,3 +1,20 @@
+# timetk 2.6.1
+
+__Improvements__
+
+- `tk_augment_slidify()`, `tk_augment_lags()`, `tk_augment_leads()`, `tk_augment_differences()`: Now works with multiple columns (passed via `.value`) and `tidyselect` (e.g. `contains()`).
+
+__Fixes__
+
+- Reduce "New names" messages. 
+```
+#> New names: 
+#> * NA -> ...1 
+```
+
+- Remove dependency on `lazyeval`. #24
+- Fix deprecated functions:  `select_()` used with `tk_xts_()`. #52
+
 # timetk 2.6.0
 
 __New Functions__
