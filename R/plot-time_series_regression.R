@@ -10,7 +10,6 @@
 #' as the y-axis value. The right-hand side of the formula is used to develop the linear regression model.
 #' See [stats::lm()] for details.
 #' @param .show_summary If `TRUE`, prints the `summary.lm()`.
-#'  Only available for non-grouped data.
 #' @param ... Additional arguments passed to [plot_time_series()]
 #'
 #' @return A static `ggplot2` plot or an interactive `plotly` plot
@@ -100,18 +99,33 @@ plot_time_series_regression.data.frame <- function(.data, .date_var, .formula, .
     date_var_expr  <- rlang::enquo(.date_var)
     value_expr     <- rlang::f_lhs(.formula)
 
+    df <- .data
+
     # Linear Regression
-    model_lm <- stats::lm(.formula, data = .data)
+    model_lm <- stats::lm(.formula, data = df)
 
     if (.show_summary) {
         print(stats::summary.lm(model_lm))
     }
 
+    # Pad Fitted Values
+
+    fitted_vec <- stats::predict(model_lm, data = df)
+
+    rowid_tbl <- tibble::tibble(row_id = seq(1, nrow(df)))
+
+    predictions_tbl <- tibble::tibble(
+        row_id = names(fitted_vec) %>% as.integer(),
+        values = as.numeric(fitted_vec)
+    )
+
+    predictions_padded_tbl <- dplyr::left_join(rowid_tbl, predictions_tbl, by = "row_id")
+
     # Data Formatted
-    data_formatted <- tibble::as_tibble(.data) %>%
+    data_formatted <- tibble::as_tibble(df) %>%
         dplyr::mutate(!! rlang::quo_name(value_expr) := !! value_expr) %>%
         dplyr::select(!! date_var_expr, rlang::quo_name(value_expr)) %>%
-        dplyr::mutate(fitted = model_lm$fitted.values) %>%
+        dplyr::mutate(fitted = predictions_padded_tbl$values) %>%
         tidyr::pivot_longer(-(!! date_var_expr))
 
     # Plot
@@ -127,12 +141,30 @@ plot_time_series_regression.grouped_df <- function(.data, .date_var, .formula, .
     date_var_expr  <- rlang::enquo(.date_var)
     value_expr     <- rlang::f_lhs(.formula)
 
-    if (.show_summary) message("'.show_summary = TRUE' is only available for ungrouped time series data.")
+    # if (.show_summary) message("'.show_summary = TRUE' is only available for ungrouped time series data.")
 
     # Linear Regression
     data_modeled <- .data %>%
         tidyr::nest() %>%
-        dplyr::mutate(model = purrr::map(data, ~ tibble::tibble(fitted = stats::lm(.formula, data = .x)$fitted.values))) %>%
+        dplyr::mutate(grp_names = stringr::str_c(!!! rlang::syms(group_names), collapse = ", ")) %>%
+        dplyr::mutate(model = purrr::map2(data, grp_names, .f = function(df, grp_names) {
+
+            mod <- stats::lm(.formula, data = df)
+
+            if (.show_summary) {
+                cat("\n")
+                cat(stringr::str_glue("Summary for Group: {grp_names}"))
+                cat("---")
+                print(stats::summary.lm(mod))
+                cat('----\n')
+            }
+
+            ret <- tibble::tibble(fitted = stats::predict(mod, df))
+
+            return(ret)
+
+        })) %>%
+        dplyr::select(-grp_names) %>%
         tidyr::unnest(cols = c(data, model))
 
 

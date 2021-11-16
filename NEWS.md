@@ -1,3 +1,31 @@
+# timetk 2.6.2
+
+__Improvements__
+
+- `summarize_by_time()`: Added a `.week_start` argument to allow specifying `.week_start = 1` for Monday start. Default is 7 for Sunday Start. This can also be changed with the `lubridate` by setting the `lubridate.week.start` option. 
+
+- Plotting Functions: 
+  
+  - Several plotting functions gain a new `.facet_dir` argument for adjusting the direction of `facet_wrap(dir)`. #94 
+  - Plot ACF Diagnostics (`plot_acf_diagnostics()`): Change default parameter to `.show_white_noise_bars = TRUE`. #85
+  - `plot_timeseries_regression()`: Can now `show_summary` for group-wise models when visualizing groups
+
+- Time Series CV (`time_series_cv()`): Add Label for `tune_results`
+
+- Improve speed of `pad_by_time()`. #93
+
+__Bug Fixes__
+
+- `tk_make_timeseries()` and `tk_make_future_timeseries()` are now able to handle end of months. #72
+
+- `tk_tbl.zoo()`: Fix an issue when `readr::type_convert()` produces warning messages about not having character columns in inputs. #89
+
+- `plot_time_series_regression()`: Fixed an issue when lags are added to `.formula`. Pads lags with NA. 
+
+- `step_fourier()` and `fourier_vec()`: Fixed issue with step_fourier failing with one observation. Added scale_factor argument to override date sequences with the stored scale factor. #77 
+
+
+
 # timetk 2.6.1
 
 __Improvements__
