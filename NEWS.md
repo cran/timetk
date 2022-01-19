@@ -1,3 +1,26 @@
+# timetk 2.7.0
+
+__New Features__
+
+- `tk_tsfeatures()`: A new function that makes it easy to generate time series feature matrix using `tsfeatures`. The main benefit is that you can pipe time series data in `tibbles` with `dplyr` groups. The features will be produced by group. #95 #84
+
+- `plot_time_series_boxplot()`: A new function that makes plotting time series boxplots simple using a `.period` argument for time series aggregation. 
+
+__New Vignettes__
+
+- [Time Series Clustering:](https://business-science.github.io/timetk/articles/TK09_Clustering.html) Uses the new `tk_tsfeatures()` function to perform time series clustering. #95 #84
+
+__Improvements__
+
+Improvements for __point forecasting__ when the target is n-periods into the future.
+
+- `time_series_cv()`, `time_series_split()`: New parameter `point_forecast`. This is useful for testing / assessing the n-th prediction in the future. When set to `TRUE`, will return a single point that returns on the last value in `assess`.  
+
+__Fixes__
+
+- Updates for rlang > 0.4.11 (dev version) #98
+- `plot_time_series()`: Smoother no longer fails when time series has 1 observation #106
+
 # timetk 2.6.2
 
 __Improvements__

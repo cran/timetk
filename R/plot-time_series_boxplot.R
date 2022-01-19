@@ -1,12 +1,18 @@
-#' Interactive Plotting for One or More Time Series
+#' Interactive Time Series Box Plots
 #'
-#' A workhorse time-series plotting function that generates interactive `plotly` plots,
-#' consolidates 20+ lines of `ggplot2` code, and scales well to many time series.
+#' A boxplot function that generates interactive `plotly` plots
+#' for time series.
 #'
 #'
 #' @param .data A `tibble` or `data.frame` with a time-based column
 #' @param .date_var A column containing either date or date-time values
 #' @param .value A column containing numeric values
+#' @param .period A time series unit of aggregation for the boxplot. Examples include:
+#'
+#'  - "1 week"
+#'  - "3 years"
+#'  - "30 minutes"
+#'
 #' @param .color_var A categorical column that can be used to change the
 #'  line color
 #' @param .facet_vars One or more grouping columns that broken out into `ggplot2` facets.
@@ -26,6 +32,11 @@
 #' @param .y_intercept_color Color for the y-intercept
 #' @param .smooth Logical - Whether or not to include a trendline smoother.
 #'  Uses See [smooth_vec()] to apply a LOESS smoother.
+#' @param .smooth_func Defines how to aggregate the .value to show the smoothed trendline.
+#'  The default is `~ mean(.x, na.rm = TRUE)`, which uses lambda function to ensure `NA` values are removed.
+#'  Possible values are:
+#'  * A function, e.g. `mean`.
+#'  * A purrr-style lambda, e.g. `~ mean(.x, na.rm = TRUE)`
 #' @param .smooth_period Number of observations to include in the Loess Smoother.
 #'  Set to "auto" by default, which uses `tk_get_trend()`
 #'  to determine a logical trend cycle.
@@ -51,12 +62,12 @@
 #'
 #' @details
 #'
-#' `plot_time_series()` is a scalable function that works with both _ungrouped_ and _grouped_
+#' `plot_time_series_boxplot()` is a scalable function that works with both _ungrouped_ and _grouped_
 #' `data.frame` objects (and `tibbles`!).
 #'
 #' __Interactive by Default__
 #'
-#' `plot_time_series()` is built for exploration using:
+#' `plot_time_series_boxplot()` is built for exploration using:
 #'
 #'  - __Interactive Plots:__ `plotly` (default) - Great for exploring!
 #'  - __Static Plots:__ `ggplot2` (set `.interactive = FALSE`) - Great for PDF Reports
@@ -65,24 +76,27 @@
 #'
 #' __Scalable with Facets & Dplyr Groups__
 #'
-#' `plot_time_series()` returns multiple time series plots using `ggplot2` facets:
+#' `plot_time_series_boxplot()` returns multiple time series plots using `ggplot2` facets:
 #'
 #'  - `group_by()` - If groups are detected, multiple facets are returned
-#'  - `plot_time_series(.facet_vars)` - You can manually supply facets as well.
+#'  - `plot_time_series_boxplot(.facet_vars)` - You can manually supply facets as well.
 #'
 #' __Can Transform Values just like ggplot__
 #'
 #' The `.values` argument accepts transformations just like `ggplot2`.
 #' For example, if you want to take the log of sales you can use
-#' a call like `plot_time_series(date, log(sales))` and the log transformation
+#' a call like `plot_time_series_boxplot(date, log(sales))` and the log transformation
 #' will be applied.
 #'
 #' __Smoother Period / Span Calculation__
 #'
 #' The `.smooth = TRUE` option returns a smoother that is calculated based on either:
 #'
-#' 1. A `.smooth_period`: Number of observations
-#' 2. A `.smooth_span`: A percentage of observations
+#' 1. A `.smooth_func`: The method of aggregation.
+#'   Usually an aggregation like `mean` is used.
+#'   The `purrr`-style function syntax can be used to apply complex functions.
+#' 2. A `.smooth_period`: Number of observations
+#' 3. A `.smooth_span`: A percentage of observations
 #'
 #' By default, the `.smooth_period` is automatically calculated using 75% of the observertions.
 #' This is the same as `geom_smooth(method = "loess", span = 0.75)`.
@@ -104,62 +118,90 @@
 #' # Works with individual time series
 #' FANG %>%
 #'     filter(symbol == "FB") %>%
-#'     plot_time_series(date, adjusted, .interactive = FALSE)
+#'     plot_time_series_boxplot(
+#'         date, adjusted,
+#'         .period      = "3 month",
+#'         .interactive = FALSE)
 #'
 #' # Works with groups
 #' FANG %>%
 #'     group_by(symbol) %>%
-#'     plot_time_series(date, adjusted,
-#'                      .facet_ncol  = 2,     # 2-column layout
-#'                      .interactive = FALSE)
+#'     plot_time_series_boxplot(
+#'         date, adjusted,
+#'         .period      = "3 months",
+#'         .facet_ncol  = 2,     # 2-column layout
+#'         .interactive = FALSE)
 #'
+#' \dontrun{
 #' # Can also group inside & use .color_var
 #' FANG %>%
 #'     mutate(year = year(date)) %>%
-#'     plot_time_series(date, adjusted,
-#'                      .facet_vars   = c(symbol, year), # add groups/facets
-#'                      .color_var    = year,            # color by year
-#'                      .facet_ncol   = 4,
-#'                      .facet_scales = "free",
-#'                      .interactive  = FALSE)
+#'     plot_time_series_boxplot(
+#'         date, adjusted,
+#'         .period      = "3 months",
+#'         .facet_vars   = c(symbol, year), # add groups/facets
+#'         .color_var    = year,            # color by year
+#'         .facet_ncol   = 4,
+#'         .facet_scales = "free",
+#'         .interactive  = FALSE)
+#' }
 #'
 #' # Can apply transformations to .value or .color_var
 #' # - .value = log(adjusted)
 #' # - .color_var = year(date)
 #' FANG %>%
-#'     plot_time_series(date, log(adjusted),
-#'                      .color_var    = year(date),
-#'                      .facet_vars   = contains("symbol"),
-#'                      .facet_ncol   = 2,
-#'                      .facet_scales = "free",
-#'                      .y_lab        = "Log Scale",
-#'                      .interactive  = FALSE)
+#'     plot_time_series_boxplot(
+#'         date, log(adjusted),
+#'         .period      = "3 months",
+#'         .color_var    = year(date),
+#'         .facet_vars   = contains("symbol"),
+#'         .facet_ncol   = 2,
+#'         .facet_scales = "free",
+#'         .y_lab        = "Log Scale",
+#'         .interactive  = FALSE)
 #'
-#'
+#' # Can adjust the smoother
+#' FANG %>%
+#'     group_by(symbol) %>%
+#'     plot_time_series_boxplot(
+#'         date, adjusted,
+#'         .period           = "3 months",
+#'         .smooth           = TRUE,
+#'         .smooth_func      = median,    # Smoother function
+#'         .smooth_period    = "5 years", # Smoother Period
+#'         .facet_ncol       = 2,
+#'         .interactive      = FALSE)
 #'
 #' @export
-plot_time_series <- function(.data, .date_var, .value, .color_var = NULL,
+plot_time_series_boxplot <- function(
+    .data, .date_var, .value,
+    .period,
 
-                             .facet_vars = NULL,
-                             .facet_ncol = 1, .facet_scales = "free_y",
-                             .facet_dir = "h",
-                             .facet_collapse = TRUE, .facet_collapse_sep = " ",
+    .color_var = NULL,
 
-                             .line_color = "#2c3e50", .line_size = 0.5,
-                             .line_type = 1, .line_alpha = 1,
-                             .y_intercept = NULL, .y_intercept_color = "#2c3e50",
+    .facet_vars = NULL,
+    .facet_ncol = 1, .facet_scales = "free_y",
+    .facet_dir = "h",
+    .facet_collapse = TRUE, .facet_collapse_sep = " ",
 
-                             .smooth = TRUE, .smooth_period = "auto",
-                             .smooth_message = FALSE,
-                             .smooth_span = NULL, .smooth_degree = 2,
-                             .smooth_color = "#3366FF", .smooth_size = 1, .smooth_alpha = 1,
+    .line_color = "#2c3e50", .line_size = 0.5,
+    .line_type = 1, .line_alpha = 1,
+    .y_intercept = NULL, .y_intercept_color = "#2c3e50",
 
-                             .legend_show = TRUE,
+    .smooth = TRUE,
+    .smooth_func = ~ mean(.x, na.rm = TRUE),
+    .smooth_period = "auto",
+    .smooth_message = FALSE,
+    .smooth_span = NULL, .smooth_degree = 2,
+    .smooth_color = "#3366FF", .smooth_size = 1, .smooth_alpha = 1,
 
-                             .title = "Time Series Plot", .x_lab = "", .y_lab = "",
-                             .color_lab = "Legend",
+    .legend_show = TRUE,
 
-                             .interactive = TRUE, .plotly_slider = FALSE) {
+    .title = "Time Series Plot", .x_lab = "", .y_lab = "",
+    .color_lab = "Legend",
+
+    .interactive = TRUE, .plotly_slider = FALSE
+) {
 
     # Tidyeval Setup
     date_var_expr  <- rlang::enquo(.date_var)
@@ -168,40 +210,53 @@ plot_time_series <- function(.data, .date_var, .value, .color_var = NULL,
 
     # Checks
     if (!is.data.frame(.data)) {
-        stop(call. = FALSE, "plot_time_series(.data) is not a data-frame or tibble. Please supply a data.frame or tibble.")
+        stop(call. = FALSE, "plot_time_series_boxplot(.data) is not a data-frame or tibble. Please supply a data.frame or tibble.")
     }
     if (rlang::quo_is_missing(date_var_expr)) {
-        stop(call. = FALSE, "plot_time_series(.date_var) is missing. Please supply a date or date-time column.")
+        stop(call. = FALSE, "plot_time_series_boxplot(.date_var) is missing. Please supply a date or date-time column.")
     }
     if (rlang::quo_is_missing(value_expr)) {
-        stop(call. = FALSE, "plot_time_series(.value) is missing. Please a numeric column.")
+        stop(call. = FALSE, "plot_time_series_boxplot(.value) is missing. Please a numeric column.")
+    }
+    if (rlang::is_missing(.period)) {
+        stop(call. = FALSE, "plot_time_series_boxplot(.period) is missing. Please use an value like '1 month', '30 minute', etc.")
     }
 
 
-    UseMethod("plot_time_series", .data)
+
+    UseMethod("plot_time_series_boxplot", .data)
 }
 
 #' @export
-plot_time_series.data.frame <- function(.data, .date_var, .value, .color_var = NULL,
-                                        .facet_vars = NULL,
-                                        .facet_ncol = 1,  .facet_scales = "free_y",
-                                        .facet_dir = "h",
-                                        .facet_collapse = TRUE, .facet_collapse_sep = " ",
-                                        .line_color = "#2c3e50", .line_size = 0.5,
-                                        .line_type = 1, .line_alpha = 1,
-                                        .y_intercept = NULL, .y_intercept_color = "#2c3e50",
+plot_time_series_boxplot.data.frame <- function(
+    .data, .date_var, .value,
+    .period,
 
-                                        .smooth = TRUE, .smooth_period = "auto",
-                                        .smooth_message = FALSE,
-                                        .smooth_span = NULL, .smooth_degree = 2,
-                                        .smooth_color = "#3366FF", .smooth_size = 1, .smooth_alpha = 1,
+    .color_var = NULL,
+    .facet_vars = NULL,
+    .facet_ncol = 1,  .facet_scales = "free_y",
+    .facet_dir = "h",
+    .facet_collapse = TRUE, .facet_collapse_sep = " ",
+    .line_color = "#2c3e50", .line_size = 0.5,
+    .line_type = 1, .line_alpha = 1,
+    .y_intercept = NULL, .y_intercept_color = "#2c3e50",
 
-                                        .legend_show = TRUE,
+    .smooth = TRUE,
+    .smooth_func = ~ mean(.x, na.rm = TRUE),
+    .smooth_period = "auto",
+    .smooth_message = FALSE,
+    .smooth_span = NULL, .smooth_degree = 2,
+    .smooth_color = "#3366FF", .smooth_size = 1, .smooth_alpha = 1,
 
-                                        .title = "Time Series Plot", .x_lab = "", .y_lab = "",
-                                        .color_lab = "Legend",
+    .legend_show = TRUE,
 
-                                        .interactive = TRUE, .plotly_slider = FALSE) {
+    .title = "Time Series Plot", .x_lab = "", .y_lab = "",
+    .color_lab = "Legend",
+
+    .interactive = TRUE,
+
+    .plotly_slider = FALSE
+) {
 
 
     # Tidyeval Setup
@@ -220,6 +275,7 @@ plot_time_series.data.frame <- function(.data, .date_var, .value, .color_var = N
     data_formatted <- tibble::as_tibble(.data) %>%
         dplyr::group_by(!!! facets_expr) %>%
         dplyr::mutate(.value_mod = !! value_expr) %>%
+        dplyr::mutate(.box_group = lubridate::floor_date(!! date_var_expr, unit = .period)) %>%
         dplyr::ungroup()
 
     # Color setup
@@ -260,21 +316,28 @@ plot_time_series.data.frame <- function(.data, .date_var, .value, .color_var = N
 
         # Handle Groups
         group_names   <- dplyr::group_vars(data_formatted)
+
+        group_names   <- c(group_names, ".box_group")
+
         if (!rlang::quo_is_null(color_var_expr)) {
             # If color applied, add as group variable
             group_names <- c(group_names, ".color_mod")
         }
 
+        data_formatted_smooth <- data_formatted
         if (length(group_names) > 0) {
-            data_formatted <- data_formatted %>%
+            data_formatted_smooth <- data_formatted_smooth %>%
                 dplyr::ungroup() %>%
                 dplyr::group_by(!!! rlang::syms(group_names))
         }
 
         # Apply smoother
-        data_formatted <- data_formatted %>%
+        data_formatted_smooth <- data_formatted_smooth %>%
+            dplyr::summarise(
+                dplyr::across(.cols = .value_mod, .fns = .smooth_func)
+            ) %>%
             dplyr::mutate(.value_smooth = auto_smooth(
-                idx                   = !! date_var_expr,
+                idx                   = .box_group,
                 x                     = .value_mod,
                 smooth_period         = .smooth_period,
                 smooth_span           = .smooth_span,
@@ -295,12 +358,14 @@ plot_time_series.data.frame <- function(.data, .date_var, .value, .color_var = N
 
     g <- data_formatted %>%
         dplyr::rename(.value = .value_mod) %>%
-        ggplot2::ggplot(ggplot2::aes(!! date_var_expr, .value))
+        ggplot2::ggplot(ggplot2::aes(.box_group, .value))
 
     # Add line
     if (rlang::quo_is_null(color_var_expr)) {
         g <- g +
-            ggplot2::geom_line(
+            ggplot2::geom_boxplot(
+                ggplot2::aes(group = .box_group)
+                ,
                 color    = .line_color,
                 size     = .line_size,
                 linetype = .line_type,
@@ -309,8 +374,8 @@ plot_time_series.data.frame <- function(.data, .date_var, .value, .color_var = N
 
     } else {
         g <- g +
-            ggplot2::geom_line(
-                ggplot2::aes(color = .color_mod, group = .color_mod),
+            ggplot2::geom_boxplot(
+                ggplot2::aes(group = .box_group, color = .color_mod),
                 size     = .line_size,
                 linetype = .line_type,
                 alpha    = .line_alpha
@@ -337,7 +402,9 @@ plot_time_series.data.frame <- function(.data, .date_var, .value, .color_var = N
                     ggplot2::aes(y = .value_smooth),
                     color = .smooth_color,
                     size  = .smooth_size,
-                    alpha = .smooth_alpha)
+                    alpha = .smooth_alpha,
+                    data  = data_formatted_smooth
+                )
 
         } else {
             g <- g +
@@ -345,7 +412,8 @@ plot_time_series.data.frame <- function(.data, .date_var, .value, .color_var = N
                     ggplot2::aes(y = .value_smooth, group = .color_mod),
                     color = .smooth_color,
                     size  = .smooth_size,
-                    alpha = .smooth_alpha
+                    alpha = .smooth_alpha,
+                    data  = data_formatted_smooth
                 )
         }
 
@@ -388,25 +456,32 @@ plot_time_series.data.frame <- function(.data, .date_var, .value, .color_var = N
 }
 
 #' @export
-plot_time_series.grouped_df <- function(.data, .date_var, .value, .color_var = NULL,
-                                        .facet_vars = NULL,
-                                        .facet_ncol = 1,  .facet_scales = "free_y", .facet_dir = "h",
-                                        .facet_collapse = TRUE, .facet_collapse_sep = " ",
-                                        .line_color = "#2c3e50", .line_size = 0.5,
-                                        .line_type = 1, .line_alpha = 1,
-                                        .y_intercept = NULL, .y_intercept_color = "#2c3e50",
+plot_time_series_boxplot.grouped_df <- function(
+    .data, .date_var, .value,
+    .period,
 
-                                        .smooth = TRUE, .smooth_period = "auto",
-                                        .smooth_message = FALSE,
-                                        .smooth_span = NULL, .smooth_degree = 2,
-                                        .smooth_color = "#3366FF", .smooth_size = 1, .smooth_alpha = 1,
+    .color_var = NULL,
+    .facet_vars = NULL,
+    .facet_ncol = 1,  .facet_scales = "free_y", .facet_dir = "h",
+    .facet_collapse = TRUE, .facet_collapse_sep = " ",
+    .line_color = "#2c3e50", .line_size = 0.5,
+    .line_type = 1, .line_alpha = 1,
+    .y_intercept = NULL, .y_intercept_color = "#2c3e50",
 
-                                        .legend_show = TRUE,
+    .smooth = TRUE,
+    .smooth_func = ~ mean(.x, na.rm = TRUE),
+    .smooth_period = "auto",
+    .smooth_message = FALSE,
+    .smooth_span = NULL, .smooth_degree = 2,
+    .smooth_color = "#3366FF", .smooth_size = 1, .smooth_alpha = 1,
 
-                                        .title = "Time Series Plot", .x_lab = "", .y_lab = "",
-                                        .color_lab = "Legend",
+    .legend_show = TRUE,
 
-                                        .interactive = TRUE, .plotly_slider = FALSE) {
+    .title = "Time Series Plot", .x_lab = "", .y_lab = "",
+    .color_lab = "Legend",
+
+    .interactive = TRUE, .plotly_slider = FALSE
+) {
 
     # Tidy Eval Setup
     group_names   <- dplyr::group_vars(.data)
@@ -415,7 +490,7 @@ plot_time_series.grouped_df <- function(.data, .date_var, .value, .color_var = N
 
     # Checks
     facet_names <- .data %>% dplyr::ungroup() %>% dplyr::select(!!! facets_expr) %>% colnames()
-    if (length(facet_names) > 0) message("plot_time_series(...): Groups are previously detected. Grouping by: ",
+    if (length(facet_names) > 0) message("plot_time_series_boxplot(...): Groups are previously detected. Grouping by: ",
                                           stringr::str_c(group_names, collapse = ", "))
 
     # ---- DATA SETUP ----
@@ -425,10 +500,12 @@ plot_time_series.grouped_df <- function(.data, .date_var, .value, .color_var = N
 
     # ---- PLOT SETUP ----
 
-    plot_time_series(
+    plot_time_series_boxplot(
         .data              = data_formatted,
         .date_var          = !! rlang::enquo(.date_var),
         .value             = !! rlang::enquo(.value),
+        .period            = .period,
+
         .color_var         = !! rlang::enquo(.color_var),
 
         # ...
@@ -447,6 +524,7 @@ plot_time_series.grouped_df <- function(.data, .date_var, .value, .color_var = N
         .y_intercept_color     = .y_intercept_color,
 
         .smooth                = .smooth,
+        .smooth_func           = .smooth_func,
         .smooth_period         = .smooth_period,
         .smooth_message        = .smooth_message,
         .smooth_span           = .smooth_span,
@@ -468,57 +546,6 @@ plot_time_series.grouped_df <- function(.data, .date_var, .value, .color_var = N
 }
 
 
-# UTILS ----
 
-# A wrapper for smooth_vec() that handles changes in grouped idx's
-auto_smooth <- function(idx, x,
-                        smooth_period,
-                        smooth_span,
-                        smooth_degree,
-                        smooth_message) {
-
-    if (length(idx) < 2) {
-        return(x)
-    }
-
-    if (all(c(is.null(smooth_span), is.numeric(idx)))) {
-        # Numeric index
-        smooth_span <- 0.75
-    }
-
-    if (all({
-        c(!is.null(smooth_period),
-          is.null(smooth_span)
-          )
-    })) {
-        # smooth_period = some value, and smooth span is NULL
-
-        if (tolower(smooth_period) == "auto") {
-            smooth_period <- ceiling(length(idx) * 0.75)
-        }
-
-        smooth_period <- tk_get_trend(
-            idx      = idx,
-            period   = smooth_period,
-            message  = smooth_message
-        )
-
-        smooth_span <- NULL
-    } else {
-        # smooth span overrides smooth period
-        smooth_period <- NULL
-        smooth_span   <- as.numeric(smooth_span)
-        # if (smooth_message) message(stringr::str_glue())
-    }
-
-   ret <- smooth_vec(
-       x      = x,
-       period = smooth_period,
-       span   = smooth_span,
-       degree = smooth_degree
-    )
-
-    return(ret)
-}
 
 

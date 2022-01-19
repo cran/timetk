@@ -69,3 +69,23 @@ taylor_30_min %>%
                    .color_lab = "Month") +
   scale_y_continuous(labels = scales::comma_format())
 
+## -----------------------------------------------------------------------------
+m4_monthly %>%
+    group_by(id) %>%
+    plot_time_series_boxplot(
+        date, value,
+        .period      = "1 year",
+        .facet_ncol  = 2,
+        .interactive = FALSE)
+
+## -----------------------------------------------------------------------------
+m4_monthly %>%
+    group_by(id) %>%
+    plot_time_series_regression(
+        .date_var     = date,
+        .formula      = log(value) ~ as.numeric(date) + month(date, label = TRUE),
+        .facet_ncol   = 2,
+        .interactive  = FALSE,
+        .show_summary = FALSE
+    )
+

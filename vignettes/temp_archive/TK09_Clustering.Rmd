@@ -1,5 +1,5 @@
 ---
-title: "Anomaly Detection"
+title: "Time Series Clustering"
 author: "Matt Dancho"
 date: "`r Sys.Date()`"
 output: 
@@ -7,7 +7,7 @@ output:
     toc: true
     toc_depth: 2
 vignette: >
-  %\VignetteIndexEntry{Anomaly Detection}
+  %\VignetteIndexEntry{Time Series Clustering}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -27,13 +27,11 @@ knitr::opts_chunk$set(
 ```
 
 
-__Anomaly detection__ is an important part of time series analysis:
+__Clustering__ is an important part of time series analysis that allows us to organize time series into groups by combining "tsfeatures" (summary matricies) with unsupervised techniques such as K-Means Clustering. In this short tutorial, we will cover the `tk_tsfeatures()` functions that computes a time series feature matrix of summarized information on one or more time series. 
 
-1. Detecting anomalies can signify special events
-2. Cleaning anomalies can improve forecast error
+# Libraries
 
-In this short tutorial, we will cover the `plot_anomaly_diagnostics()` and `tk_anomaly_diagnostics()` functions for visualizing and automatically detecting anomalies at scale. 
-
+To get started, load the following libraries. 
 
 ```{r}
 library(tidyverse)
@@ -51,25 +49,75 @@ This tutorial will use the `walmart_sales_weekly` dataset:
 walmart_sales_weekly
 ```
 
-# Anomaly Visualization
+# TS Features
 
-Using the `plot_anomaly_diagnostics()` function, we can interactively detect anomalies at scale. 
+Using the `tk_tsfeatures()` function, we can quickly get the "tsfeatures" for each of the time series. A few important points:
+
+- The `features` parameter come from the `tsfeatures` R package. Use one of the function names from `tsfeatures` R package e.g.("lumpiness", "stl_features").
+
+- We can supply any function that returns an aggregation (e.g. "mean" will apply the `base::mean()` function).
+
+- You can supply custom functions by creating a function and providing it (e.g. `my_mean()` defined below)
 
 ```{r, fig.height=7}
-walmart_sales_weekly %>%
-  group_by(Store, Dept) %>%
-  plot_anomaly_diagnostics(Date, Weekly_Sales, .facet_ncol = 2)
+# Custom Function
+my_mean <- function(x, na.rm=TRUE) {
+  mean(x, na.rm = na.rm)
+}
+
+tsfeature_tbl <- walmart_sales_weekly %>%
+    group_by(id) %>%
+    tk_tsfeatures(
+      .date_var = Date,
+      .value    = Weekly_Sales,
+      .period   = 52,
+      .features = c("frequency", "stl_features", "entropy", "acf_features", "my_mean"),
+      .scale    = TRUE,
+      .prefix   = "ts_"
+    ) %>%
+    ungroup()
+
+tsfeature_tbl
 ```
 
 
-# Automatic Anomaly Detection
+# Clustering with K-Means
 
-To get the data on the anomalies, we use `tk_anomaly_diagnostics()`, the preprocessing function. 
+We can quickly add cluster assignments with the `kmeans()` function and some tidyverse data wrangling. 
 
 ```{r}
-walmart_sales_weekly %>%
-  group_by(Store, Dept) %>%
-  tk_anomaly_diagnostics(Date, Weekly_Sales)
+set.seed(123)
+
+
+cluster_tbl <- tibble(
+    cluster = tsfeature_tbl %>% 
+        select(-id) %>%
+        as.matrix() %>%
+        kmeans(centers = 3, nstart = 100) %>%
+        pluck("cluster")
+) %>%
+    bind_cols(
+        tsfeature_tbl
+    )
+
+cluster_tbl
+```
+
+# Visualize the Cluster Assignments
+
+Finally, we can visualize the cluster assignments by joining the `cluster_tbl` with the original `walmart_sales_weekly` and then plotting with `plot_time_series()`. 
+
+```{r}
+cluster_tbl %>%
+    select(cluster, id) %>%
+    right_join(walmart_sales_weekly, by = "id") %>%
+    group_by(id) %>%
+    plot_time_series(
+      Date, Weekly_Sales, 
+      .color_var   = cluster, 
+      .facet_ncol  = 2, 
+      .interactive = FALSE
+    )
 ```
 
 

@@ -1,6 +1,5 @@
 ---
-title: "What is the Time Series Signature?"
-subtitle: "And the timestamp index, and the time series summary?"
+title: "Calendar Features"
 author: "Matt Dancho"
 date: "`r Sys.Date()`"
 output: 
@@ -8,7 +7,7 @@ output:
     toc: true
     toc_depth: 2
 vignette: >
-  %\VignetteIndexEntry{Time Series Signature}
+  %\VignetteIndexEntry{Calendar Features}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -27,9 +26,12 @@ knitr::opts_chunk$set(
 # devtools::load_all() # Travis CI fails on load_all()
 ```
 
-> A collection of tools for working with time series in R
 
-The __time series index__, which consists of a collection of time-based values that define _when_ each observation occurred, is the most important part of a time series object. 
+This vignette covers making and working with __Calendar Features__, which are derived from a time series index, or the sequence of date/datetime stamps that accompany time series data. 
+
+# Introduction
+
+The __time series index__ consists of a collection of time-based values that define _when_ each observation occurred, is the most important part of a time series object. 
 
 The index gives the user a lot of information in a simple timestamp. Consider the datetime ___"2016-01-01 00:00:00"___. 
 
