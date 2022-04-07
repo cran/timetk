@@ -152,6 +152,8 @@ prep.step_log_interval <- function(x, training, info = NULL, ...) {
     limit_lower_trained <- training[, col_names] %>%
         purrr::map(.f = function(vals) {
 
+            vals <- vals + x$offset
+
             max_x   <- max(vals)
             min_x   <- min(vals)
             range_x <- abs(max_x - min_x)
@@ -161,6 +163,8 @@ prep.step_log_interval <- function(x, training, info = NULL, ...) {
 
     limit_upper_trained <- training[, col_names] %>%
         purrr::map(.f = function(vals) {
+
+            vals <- vals + x$offset
 
             max_x   <- max(vals)
             min_x   <- min(vals)
@@ -194,6 +198,9 @@ bake.step_log_interval <- function(object, new_data, ...) {
 
     for (i in seq_along(object$limit_lower_trained)) {
 
+        print(object$limit_lower_trained[i])
+        print(object$limit_upper_trained[i])
+
         new_data[, param[i]] <- log_interval_vec(
             x           = new_data %>% purrr::pluck(param[i]),
             limit_lower = as.numeric(object$limit_lower_trained[i]),
@@ -209,8 +216,8 @@ bake.step_log_interval <- function(object, new_data, ...) {
 #' @export
 print.step_log_interval <-
     function(x, width = max(20, options()$width - 35), ...) {
-        cat("Log-interval transformation on ", sep = "")
-        printer(names(x$limit_lower_trained), x$terms, x$trained, width = width)
+        title <- "Log-interval transformation on "
+        recipes::print_step(names(x$limit_lower_trained), x$terms, x$trained, width = width, title = title)
         invisible(x)
     }
 

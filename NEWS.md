@@ -1,3 +1,40 @@
+# timetk 2.7.0.9000
+
+__New Features__
+
+Many of the plotting functions have been upgraded for use with `trelliscopejs` for 
+easier visualization of many time series. 
+
+- `plot_time_series()`: 
+    - Gets a new argument `trelliscope`: Used for visualizing many time series.
+    - Gets a new argument `.facet_strip_remove` to remove facet strips since trelliscope is automatically labeled.
+    - Gets a new argument `.facet_nrow` to adjust grid with trelliscope.
+    - The default argument for `facet_collapse = TRUE` was changed to `FALSE` for better compatibility with Trelliscope JS. This may cause some plots to have multiple groups take up extra space in the strip.
+    
+- `plot_time_series_boxplot()`: 
+    - Gets a new argument `trelliscope`: Used for visualizing many time series.
+    - Gets a new argument `.facet_strip_remove` to remove facet strips since trelliscope is automatically labeled.
+    - Gets a new argument `.facet_nrow` to adjust grid with trelliscope.
+    - The default argument for `.facet_collapse = TRUE` was changed to `FALSE` for better compatibility with Trelliscope JS. This may cause some plots to have multiple groups take up extra space in the strip.
+  
+- `plot_anomaly_diagnostics()`: 
+    - Gets a new argument `trelliscope`: Used for visualizing many time series.
+    - Gets a new argument `.facet_strip_remove` to remove facet strips since trelliscope is automatically labeled.
+    - Gets a new argument `.facet_nrow` to adjust grid with trelliscope.
+    - The default argument for `.facet_collapse = TRUE` was changed to `FALSE` for better compatibility with Trelliscope JS. This may cause some plots to have multiple groups take up extra space in the strip.
+
+
+__Updates & Bug Fixes__
+
+- Recipes steps (e.g. `step_timeseries_signature()`) use the new `recipes::print_step()` function. Requires `recipes >= 0.2.0`. #110
+
+- Offset parameter in `step_log_interval()` was not working properly. Now works. #103
+
+
+__Potential Breaking Changes__
+
+- The default argument for `.facet_collapse = TRUE` was changed to `FALSE` for better compatibility with Trelliscope JS. This may cause some plots to have multiple groups take up extra space in the strip. 
+
 # timetk 2.7.0
 
 __New Features__
@@ -9,6 +46,8 @@ __New Features__
 __New Vignettes__
 
 - [Time Series Clustering:](https://business-science.github.io/timetk/articles/TK09_Clustering.html) Uses the new `tk_tsfeatures()` function to perform time series clustering. #95 #84
+
+- [Time Series Visualization:](https://business-science.github.io/timetk/articles/TK04_Plotting_Time_Series.html) Updated to include `plot_time_series_boxplot()` and `plot_time_series_regression()`.
 
 __Improvements__
 
