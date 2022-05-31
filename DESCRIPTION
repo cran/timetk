@@ -1,7 +1,7 @@
 Package: timetk
 Type: Package
 Title: A Tool Kit for Working with Time Series in R
-Version: 2.8.0
+Version: 2.8.1
 Authors@R: c(
     person("Matt", "Dancho", email = "mdancho@business-science.io", role = c("aut", "cre")),
     person("Davis", "Vaughan", email = "dvaughan@business-science.io", role = c("aut"))
@@ -31,9 +31,9 @@ Suggests: tidyquant, tidymodels, modeltime, workflows, parsnip, tune,
 RoxygenNote: 7.1.2
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2022-04-07 11:29:28 UTC; mdanc
+Packaged: 2022-05-31 20:16:43 UTC; mdanc
 Author: Matt Dancho [aut, cre],
   Davis Vaughan [aut]
 Maintainer: Matt Dancho <mdancho@business-science.io>
 Repository: CRAN
-Date/Publication: 2022-04-07 12:20:02 UTC
+Date/Publication: 2022-05-31 21:10:02 UTC

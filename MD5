@@ -1,6 +1,6 @@
-65f962ebd9460b31ea417b47502a135d *DESCRIPTION
+10292da75423666d417ab4d8c2dc1ebb *DESCRIPTION
 84d53fe2e4327fe2e09e926b6443b550 *NAMESPACE
-37d8759f913f42721a813700e33f81d8 *NEWS.md
+437c09f633ee8efe88353716ab8311e0 *NEWS.md
 66ba0a8fd3af2a14bd14cd42248aeb54 *R/00_global_vars.R
 9326929df8b96b0131aa77fc8cd15f1a *R/augment-tk_augment_differences.R
 1c5d0f849209e10c620abe3704aedf5f *R/augment-tk_augment_fourier.R
@@ -50,11 +50,11 @@ cf3f3f1d7b7fc8c269f9021f85ddcab2 *R/get-tk_get_timeseries.R
 db9275906ed17fa8ddd7729d927eaea6 *R/make-tk_make_timeseries.R
 d79dd43927b309611f964956180f0958 *R/make-tk_make_timeseries_future.R
 4271aa2d607e9cfb64c1cfc23637a802 *R/plot-acf_diagnostics.R
-c0a8294dceff4180823846d96a06e708 *R/plot-anomaly_diagnostics.R
+56ed4ed4623bc9e7c012f6857ecfc2f0 *R/plot-anomaly_diagnostics.R
 ef93868a89e33bd716bec84cb856876d *R/plot-seasonal_diagnostics.R
 33b8af5ad8c6d8464a5448103488d9c9 *R/plot-stl_diagnostics.R
-06418a48000fd571f44dbd871d02e0a4 *R/plot-time_series.R
-8323bc796b6c51b01b050061cea0adcc *R/plot-time_series_boxplot.R
+c6d9a85d83cb86e2a31f64a063e95b2b *R/plot-time_series.R
+5b21c775d69c050b47fcd4c50a3679af *R/plot-time_series_boxplot.R
 c3cac82d130da15ec26ffda74196f48f *R/plot-time_series_regression.R
 ad7bf15aa3823977b654fbf7adfbdd7f *R/recipes-step_box_cox.R
 0a112a5cfa5ce5e3296e899cd60990ba *R/recipes-step_diff.R
@@ -108,7 +108,7 @@ c4784b4e3a7886ac83ca45acdd5cd89f *inst/doc/TK04_Plotting_Time_Series.Rmd
 b1bb604aa5e53491e6aecfcdd22664cb *inst/doc/TK04_Plotting_Time_Series.html
 4a99dbb156ccb4230ef80e89735d3c4d *inst/doc/TK07_Time_Series_Data_Wrangling.R
 a0fcc6d4a554168d5f0ba117c448436e *inst/doc/TK07_Time_Series_Data_Wrangling.Rmd
-278bc6db152f5a9d45bb8756fd745877 *inst/doc/TK07_Time_Series_Data_Wrangling.html
+3ebfebb4d937972589c3897528e8895c *inst/doc/TK07_Time_Series_Data_Wrangling.html
 514fb868b1070fa80c0802eaada0afd5 *man/between_time.Rd
 d2302587b43d92c45dd02569b2f3a443 *man/bike_sharing_daily.Rd
 90c3f66f284b55da8141fe539cd6a9f9 *man/box_cox_vec.Rd
@@ -141,11 +141,11 @@ a8c9eda641021070191996e6efe30592 *man/normalize_vec.Rd
 8562b867ba63d6a8f8b59abf640f9015 *man/pad_by_time.Rd
 294781e1b928c859778297e662d72c9c *man/parse_date2.Rd
 7d40ea8b8e9481d5ebb1dd6dc518aa66 *man/plot_acf_diagnostics.Rd
-de3c3b4ee7251cc59db59c7d8a039ce6 *man/plot_anomaly_diagnostics.Rd
+6ddcfc16d973e2630dae6d30da019aed *man/plot_anomaly_diagnostics.Rd
 aa200355f656b941aad8c9aa9a776737 *man/plot_seasonal_diagnostics.Rd
 0f06d06bd8e9e5bff2a0fc9d9eeb3349 *man/plot_stl_diagnostics.Rd
-b94e2c4dfcb1d8e0e8305172206243cd *man/plot_time_series.Rd
-3cfa73064a84def66029f0c6640a8233 *man/plot_time_series_boxplot.Rd
+f20c519b6ca58af89df656192e7be884 *man/plot_time_series.Rd
+932e7907e2fa8ede9e921b44039ef3dd *man/plot_time_series_boxplot.Rd
 98784bfa699b8aa5ecaa28f0249a0c69 *man/plot_time_series_cv_plan.Rd
 96b4996f78d2638301fb3f77ff066e6b *man/plot_time_series_regression.Rd
 790daa2a79c3a4879318dec08443cd87 *man/required_pkgs.timetk.Rd
