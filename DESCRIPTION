@@ -1,7 +1,7 @@
 Package: timetk
 Type: Package
 Title: A Tool Kit for Working with Time Series in R
-Version: 2.8.1
+Version: 2.8.2
 Authors@R: c(
     person("Matt", "Dancho", email = "mdancho@business-science.io", role = c("aut", "cre")),
     person("Davis", "Vaughan", email = "dvaughan@business-science.io", role = c("aut"))
@@ -28,12 +28,12 @@ Suggests: tidyquant, tidymodels, modeltime, workflows, parsnip, tune,
         yardstick, tidyverse, knitr, rmarkdown, robets, broom, scales,
         testthat, fracdiff, timeSeries, tseries, trelliscopejs,
         roxygen2, covr
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.1
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2022-05-31 20:16:43 UTC; mdanc
+Packaged: 2022-11-17 15:59:31 UTC; mdancho
 Author: Matt Dancho [aut, cre],
   Davis Vaughan [aut]
 Maintainer: Matt Dancho <mdancho@business-science.io>
 Repository: CRAN
-Date/Publication: 2022-05-31 21:10:02 UTC
+Date/Publication: 2022-11-17 19:30:02 UTC

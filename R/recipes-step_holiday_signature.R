@@ -172,11 +172,11 @@ step_holiday_signature_new <-
 #' @export
 prep.step_holiday_signature <- function(x, training, info = NULL, ...) {
 
-    col_names <- recipes::terms_select(x$terms, info = info)
+    col_names <- recipes::recipes_eval_select(x$terms, data = training, info = info)
 
     date_data <- info[info$variable %in% col_names, ]
 
-    if (any(date_data$type != "date"))
+    if (any(!date_data$type %in% c("date", "datetime")))
         rlang::abort(
             paste0("All variables for `step_holiday_signature` should be either `Date` or",
                    "`POSIXct` classes."

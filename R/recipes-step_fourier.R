@@ -190,7 +190,7 @@ step_fourier_new <-
 #' @export
 prep.step_fourier <- function(x, training, info = NULL, ...) {
 
-    col_names <- recipes::terms_select(x$terms, info = info)
+    col_names <- recipes::recipes_eval_select(x$terms, data = training, info = info)
 
     date_data <- info[info$variable %in% col_names, ]
 
@@ -198,7 +198,7 @@ prep.step_fourier <- function(x, training, info = NULL, ...) {
         rlang::abort("Only one column permitted")
     }
 
-    if (any(date_data$type != "date"))
+    if (any(!date_data$type %in% c("date", "datetime")))
         rlang::abort(
             paste0("All variables for `step_fourier` should be either `Date` or",
                    " `POSIXct` classes."
