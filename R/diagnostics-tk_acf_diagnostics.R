@@ -14,6 +14,10 @@
 #' versus the `.value`. Useful for evaluating external lagged regressors.
 #' @param .lags A seqence of one or more lags to evaluate.
 #'
+#' @return
+#' A `tibble` or `data.frame` containing the autocorrelation, partial autocorrelation
+#' and cross correlation data.
+#'
 #' @details
 #'
 #' __Simplified ACF, PACF, & CCF__
@@ -56,8 +60,7 @@
 #' - __Visualizing Time Series:__ [plot_time_series()]
 #'
 #' @examples
-#' library(tidyverse)
-#' library(tidyquant)
+#' library(dplyr)
 #' library(timetk)
 #'
 #' # ACF, PACF, & CCF in 1 Data Frame

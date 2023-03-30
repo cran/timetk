@@ -92,9 +92,10 @@
 #'
 #' @examples
 #' library(dplyr)
-#' library(tidyquant)
 #' library(timetk)
 #'
+#' # Set max.print to 50
+#' options_old <- options()$max.print
 #' options(max.print = 50)
 #'
 #' # ---- DATE ----
@@ -150,6 +151,8 @@
 #'     skip_values   = "2011-01-05",
 #'     insert_values = "2011-01-06"
 #' )
+#'
+#' options(max.print = options_old)
 #'
 #' @name tk_make_timeseries
 NULL

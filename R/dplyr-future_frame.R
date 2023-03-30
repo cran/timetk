@@ -87,8 +87,8 @@
 #' - Making Future Time Series: [tk_make_future_timeseries()] (Underlying function)
 #'
 #' @examples
-#' library(tidyverse)
-#' library(tidyquant)
+#' \donttest{
+#' library(dplyr)
 #' library(timetk)
 #'
 #' # 30-min interval data
@@ -127,7 +127,7 @@
 #'         .length_out       = "1 year",
 #'         .skip_values      = c(holidays, weekends)
 #'     )
-#'
+#' }
 #'
 #' @name future_frame
 NULL

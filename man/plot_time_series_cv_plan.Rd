@@ -29,6 +29,10 @@ Uses See \code{\link[=smooth_vec]{smooth_vec()}} to apply a LOESS smoother.}
 
 \item{.title}{Title for the plot}
 }
+\value{
+Returns a static \code{ggplot} or interactive \code{plotly} object depending on
+whether or not \code{.interactive} is \code{FALSE} or \code{TRUE}, respectively.
+}
 \description{
 The \code{plot_time_series_cv_plan()} function provides a visualization
 for a time series resample specification (\code{rset}) of either \code{rolling_origin}
@@ -41,8 +45,7 @@ A resample set is an output of the \code{timetk::time_series_cv()} function or t
 \code{rsample::rolling_origin()} function.
 }
 \examples{
-library(tidyverse)
-library(tidyquant)
+library(dplyr)
 library(rsample)
 library(timetk)
 

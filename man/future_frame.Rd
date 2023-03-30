@@ -113,8 +113,8 @@ Now you can just do:
 }\if{html}{\out{</div>}}
 }
 \examples{
-library(tidyverse)
-library(tidyquant)
+\donttest{
+library(dplyr)
 library(timetk)
 
 # 30-min interval data
@@ -152,7 +152,7 @@ FANG \%>\%
         .length_out       = "1 year",
         .skip_values      = c(holidays, weekends)
     )
-
+}
 
 }
 \seealso{

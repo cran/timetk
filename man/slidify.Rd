@@ -45,6 +45,9 @@ use \code{.unlist = TRUE}. If the function returns more than one value, or a mor
 complicated object (like a linear model), use \code{.unlist = FALSE} to create
 a list-column of the rolling results.}
 }
+\value{
+A \code{function} with the rolling/sliding conversion applied.
+}
 \description{
 \code{slidify} returns a rolling (sliding) version of the input function, with a
 rolling (sliding) \code{.period} specified by the user.
@@ -87,9 +90,9 @@ A key improvement over \code{tibbletime::slidify()} is that \code{timetk::slidif
 \code{.partial} rolling windows. Just set \code{.partial = TRUE}.
 }
 \examples{
-library(tidyverse)
-library(tidyquant)
+library(dplyr)
 library(tidyr)
+library(stringr)
 library(timetk)
 
 FB <- FANG \%>\% filter(symbol == "FB")

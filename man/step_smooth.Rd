@@ -115,8 +115,8 @@ polynomial regression (loess) as the training data.
 }
 \examples{
 library(recipes)
-library(tidyverse)
-library(tidyquant)
+library(dplyr)
+library(ggplot2)
 library(timetk)
 
 # Training Data

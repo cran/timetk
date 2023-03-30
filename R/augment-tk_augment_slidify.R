@@ -41,8 +41,8 @@
 #' - [`slidify_vec()`] - The underlying function that powers `tk_augment_slidify()`
 #'
 #' @examples
-#' library(tidyverse)
-#' library(tidyquant)
+#' library(dplyr)
+#' library(stringr)
 #' library(timetk)
 #'
 #' # Single Column | Multiple Rolling Windows
@@ -53,7 +53,7 @@
 #'         .value   = contains("adjust"),
 #'         # Multiple rolling windows
 #'         .period  = c(10, 30, 60, 90),
-#'         .f       = AVERAGE,
+#'         .f       = mean,
 #'         .partial = TRUE,
 #'         .names   = str_c("MA_", c(10, 30, 60, 90))
 #'     ) %>%
@@ -66,7 +66,7 @@
 #'     tk_augment_slidify(
 #'         .value  = c(adjusted, volume),
 #'         .period  = c(10, 30, 60, 90),
-#'         .f       = AVERAGE,
+#'         .f       = mean,
 #'         .partial = TRUE
 #'     ) %>%
 #'     ungroup()

@@ -111,9 +111,10 @@ the \code{length_out} parameter, the length may differ than the \code{length_out
 }
 \examples{
 library(dplyr)
-library(tidyquant)
 library(timetk)
 
+# Set max.print to 50
+options_old <- options()$max.print
 options(max.print = 50)
 
 # ---- DATE ----
@@ -169,6 +170,8 @@ tk_make_timeseries(
     skip_values   = "2011-01-05",
     insert_values = "2011-01-06"
 )
+
+options(max.print = options_old)
 
 }
 \seealso{

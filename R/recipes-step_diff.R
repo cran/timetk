@@ -54,8 +54,8 @@
 #' @rdname step_diff
 #'
 #' @examples
-#' library(tidyverse)
-#' library(tidyquant)
+#' library(dplyr)
+#' library(tidyr)
 #' library(recipes)
 #' library(timetk)
 #'

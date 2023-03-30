@@ -9,6 +9,9 @@
 #' @param .start_date The starting date for the filter sequence
 #' @param .end_date The ending date for the filter sequence
 #'
+#' @return
+#' Returns a `tibble` or `data.frame` that has been filtered.
+#'
 #' @details
 #'
 #' __Pure Time Series Filtering Flexibilty__
@@ -61,8 +64,7 @@
 #' - This function is based on the `tibbletime::filter_time()` function developed by Davis Vaughan.
 #'
 #' @examples
-#' library(tidyverse)
-#' library(tidyquant)
+#' library(dplyr)
 #' library(timetk)
 #'
 #' # Filter values in January 1st through end of February, 2013

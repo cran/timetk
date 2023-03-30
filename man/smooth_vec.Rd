@@ -56,8 +56,8 @@ window size is unknown. You can specify \code{span = 0.75} to locally regress
 using a window of 75\% of the data.
 }
 \examples{
-library(tidyverse)
-library(tidyquant)
+library(dplyr)
+library(ggplot2)
 library(timetk)
 
 # Training Data
@@ -88,7 +88,7 @@ FB_tbl \%>\%
     mutate(
         adjusted_loess_30 = smooth_vec(adjusted, period = 30, degree = 0),
         adjusted_ma_30    = slidify_vec(adjusted, .period = 30,
-                                        .f = AVERAGE, .partial = TRUE)
+                                        .f = mean, .partial = TRUE)
     ) \%>\%
     ggplot(aes(date, adjusted)) +
     geom_line() +

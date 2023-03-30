@@ -1,13 +1,19 @@
 library(testthat)
 library(timetk)
-library(tidyverse)
-library(tidyquant)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(stringr)
+library(lubridate)
+library(zoo)
 
 # Forecast objects
 library(forecast)
-library(robets)
 library(fracdiff)
 library(timeDate)
 library(tseries)
+
+# Feature engineering
+library(recipes)
 
 test_check("timetk")

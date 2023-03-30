@@ -16,6 +16,8 @@
 #' @param .end_date  Specifies the end of the padded series.
 #'  If NULL it will use the highest value of the input variable.
 #'
+#' @returns A `tibble` or `data.frame` with rows containing missing timestamps added.
+#'
 #' @details
 #'
 #' __Padding Missing Observations__
@@ -66,8 +68,8 @@
 #' - This function wraps the `padr::pad()` function developed by Edwin Thoen.
 #'
 #' @examples
-#' library(tidyverse)
-#' library(tidyquant)
+#' library(tibble)
+#' library(dplyr)
 #' library(timetk)
 #'
 #' # Create a quarterly series with 1 missing value

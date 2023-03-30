@@ -47,9 +47,10 @@
 #'
 #' @examples
 #' library(dplyr)
-#' library(tidyquant)
 #' library(timetk)
 #'
+#' # Set max.print to 50
+#' options_old <- options()$max.print
 #' options(max.print = 50)
 #'
 #'
@@ -91,6 +92,7 @@
 #'                               skip_values      = c(holidays, weekends))
 #'
 #'
+#' options(max.print = options_old)
 #'
 #' @name tk_make_holiday_sequence
 NULL
@@ -144,8 +146,8 @@ tk_make_weekend_sequence <- function(start_date, end_date) {
         by         = "day")
 
     ret_tbl <- tibble::tibble(date_sequence = date_sequence) %>%
-        dplyr::mutate(weekday = lubridate::wday(date_sequence, label = TRUE)) %>%
-        dplyr::filter((weekday == "Sat" | weekday == "Sun"))
+        dplyr::mutate(weekday = lubridate::wday(date_sequence, week_start = 7)) %>%
+        dplyr::filter((weekday == 1 | weekday == 7))
 
     ret_tbl %>% dplyr::pull(date_sequence)
 }

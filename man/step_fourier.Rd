@@ -117,8 +117,7 @@ This returns 8 Fouriers series:
 }
 \examples{
 library(recipes)
-library(tidyverse)
-library(tidyquant)
+library(dplyr)
 library(timetk)
 
 FB_tbl <- FANG \%>\%

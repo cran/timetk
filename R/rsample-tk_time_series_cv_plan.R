@@ -7,6 +7,9 @@
 #' @param .data A time series resample specification of of either `rolling_origin`
 #' or `time_series_cv` class.
 #'
+#' @return
+#' A `tibble` containing the time series crossvalidation plan.
+#'
 #' @details
 #'
 #' __Resample Set__
@@ -21,8 +24,7 @@
 #'   time series resample plan.
 #'
 #' @examples
-#' library(tidyverse)
-#' library(tidyquant)
+#' library(dplyr)
 #' library(rsample)
 #' library(timetk)
 #'

@@ -60,9 +60,13 @@ The type of the fourier series can be either \code{sin} or \code{cos}. It's comm
 to add both sin and cos series.
 }
 \examples{
-library(tidyverse)
+library(tibble)
+library(dplyr)
+library(tidyr)
 library(timetk)
 
+# Set max.print to 50
+options_old <- options()$max.print
 options(max.print = 50)
 
 date_sequence <- tk_make_timeseries("2016-01-01", "2016-01-31", by = "hour")
@@ -88,7 +92,7 @@ tibble(date = date_sequence) \%>\%
         .title = "7-Day Fourier Terms"
     )
 
-
+options(max.print = options_old)
 
 }
 \seealso{

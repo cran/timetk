@@ -29,8 +29,7 @@ __Frequency and trend cycles__ are used in many time series applications includi
 Before we get started, load the following packages.
 
 ```{r, message = F, warning=FALSE}
-library(tidyverse)
-library(tidyquant) # Used for FANG dataset
+library(dplyr)
 library(timetk)
 ```
 
@@ -38,7 +37,7 @@ library(timetk)
 
 __Daily Irregular Data__
 
-The daily stock prices of Facebook from 2013 to 2016 (courtesy of `tidyquant`). Note that trading days only occur on "business days" (non-weekends and non-business-holidays).
+The daily stock prices of Facebook from 2013 to 2016. Note that trading days only occur on "business days" (non-weekends and non-business-holidays).
 
 ```{r}
 data(FANG)

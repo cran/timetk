@@ -60,8 +60,8 @@
 #' 2. Box, G. E. P. and Cox, D. R. (1964) An analysis of transformations. _JRSS_ B __26__ 211–246.
 #'
 #' @examples
-#' library(tidyverse)
-#' library(tidyquant)
+#' library(dplyr)
+#' library(tidyr)
 #' library(recipes)
 #' library(timetk)
 #'
@@ -144,7 +144,7 @@ step_box_cox_new <-
 prep.step_box_cox <- function(x, training, info = NULL, ...) {
 
     col_names <- recipes_eval_select(x$terms, data = training, info = info)
-    recipes::check_type(training[, col_names])
+    recipes::check_type(training[, col_names], types = c("double", "integer"))
 
     lambda_values <- training[, col_names] %>%
         purrr::map(.f = function(vals) {

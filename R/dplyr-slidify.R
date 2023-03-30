@@ -13,6 +13,9 @@
 #' complicated object (like a linear model), use `.unlist = FALSE` to create
 #' a list-column of the rolling results.
 #'
+#' @return
+#' A `function` with the rolling/sliding conversion applied.
+#'
 #' @details
 #' The `slidify()` function is almost identical to `tibbletime::rollify()`
 #' with 3 improvements:
@@ -71,9 +74,9 @@
 #'
 #'
 #' @examples
-#' library(tidyverse)
-#' library(tidyquant)
+#' library(dplyr)
 #' library(tidyr)
+#' library(stringr)
 #' library(timetk)
 #'
 #' FB <- FANG %>% filter(symbol == "FB")

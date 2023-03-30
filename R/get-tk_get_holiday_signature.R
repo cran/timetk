@@ -40,8 +40,8 @@
 #' - [step_holiday_signature()] - Preprocessing and feature engineering steps for use with `recipes`
 #'
 #' @examples
-#' library(tidyverse)
-#' library(tidyquant)
+#' library(dplyr)
+#' library(stringr)
 #' library(timetk)
 #'
 #' # Works with time-based tibbles

@@ -49,14 +49,13 @@ In this vignette the user will be exposed to:
 Before we get started, load the following packages.
 
 ```{r, message = F, warning=FALSE}
-library(tidyverse)
-library(tidyquant) # Used for FANG dataset
+library(dplyr)
 library(timetk)
 ```
 
 # Data
 
-We'll use the Facebook stock prices from the `FANG` data set from `tidyquant`. These are the historical stock prices (open, high, low, close, volume, and adjusted) for the "FB" stock from 2013 through 2016.
+We'll use the Facebook stock prices from the `FANG` data set. These are the historical stock prices (open, high, low, close, volume, and adjusted) for the "FB" stock from 2013 through 2016.
 
 ```{r}
 data("FANG")

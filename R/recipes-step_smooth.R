@@ -98,8 +98,8 @@
 #'
 #' @examples
 #' library(recipes)
-#' library(tidyverse)
-#' library(tidyquant)
+#' library(dplyr)
+#' library(ggplot2)
 #' library(timetk)
 #'
 #' # Training Data
@@ -222,7 +222,7 @@ prep.step_smooth <- function(x, training, info = NULL, ...) {
 
     col_names <- recipes::recipes_eval_select(x$terms, data = training, info = info)
 
-    check_type(training[, col_names])
+    check_type(training[, col_names], types = c("double", "integer"))
 
     if (!is.null(x$names)) {
         if (length(x$names) != length(col_names))

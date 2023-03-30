@@ -44,8 +44,8 @@ Additional concepts covered:
 Load the following libraries. 
 
 ```{r}
-library(tidyverse)
-library(tidyquant) 
+library(dplyr)
+library(tidyr)
 library(timetk)
 ```
 
@@ -83,22 +83,23 @@ FANG %>%
 
 `summarise_by_time()` aggregates by a period. It's great for:
 
-- Period Aggregation - `SUM()`
-- Period Smoothing - `AVERAGE()`, `FIRST()`, `LAST()`
+- Period Aggregation - `sum()`
+- Period Smoothing - `mean()`, `first()`, `last()`
 
 ## Period Summarization
 
 Objective: Get the total trade volume by quarter
 
-- Use `SUM()`
+- Use `sum()`
 - Aggregate using `.by = "quarter"`
 
 ```{r}
 FANG %>%
   group_by(symbol) %>%
   summarise_by_time(
-    date, .by = "quarter",
-    volume = SUM(volume)
+    date, 
+    .by    = "quarter",
+    volume = sum(volume)
   ) %>%
   plot_time_series(date, volume, .facet_ncol = 2, .interactive = FALSE, .y_intercept = 0)
 ```
@@ -108,15 +109,16 @@ FANG %>%
 
 Objective: Get the first value in each month
 
-- We can use `FIRST()` to get the first value, which has the effect of reducing the data (i.e. smoothing). We could use `AVERAGE()` or `MEDIAN()`. 
+- We can use `first()` to get the first value, which has the effect of reducing the data (i.e. smoothing). We could use `mean()` or `median()`. 
 - Use the summarization by time: `.by = "month"` to aggregate by month. 
 
 ```{r}
 FANG %>%
   group_by(symbol) %>%
   summarise_by_time(
-    date, .by = "month",
-    adjusted = FIRST(adjusted)
+    date, 
+    .by = "month",
+    adjusted = first(adjusted)
   ) %>%
   plot_time_series(date, adjusted, .facet_ncol = 2, .interactive = FALSE)
 ```
@@ -174,7 +176,7 @@ FANG %>%
   group_by(symbol) %>%
   pad_by_time(date, .by = "hour") %>%
   mutate_at(vars(open:adjusted), .funs = ts_impute_vec, period = 1) %>%
-  filter_by_time(date, "start", FIRST(date) %+time% "1 month") %>%
+  filter_by_time(date, "start", first(date) %+time% "1 month") %>%
   plot_time_series(date, adjusted, .facet_ncol = 2, .interactive = FALSE) 
 ```
 
@@ -186,11 +188,11 @@ We have a new function, `slidify()` that turns any function into a sliding (roll
 
 Objective: Calculate a "centered" simple rolling average with partial window rolling and the start and end windows. 
 
-- `slidify()` turns the `AVERAGE()` function into a rolling average. 
+- `slidify()` turns the `mean()` function into a rolling average. 
 
 ```{r}
 # Make the rolling function
-roll_avg_30 <- slidify(.f = AVERAGE, .period = 30, .align = "center", .partial = TRUE)
+roll_avg_30 <- slidify(.f = mean, .period = 30, .align = "center", .partial = TRUE)
 
 # Apply the rolling function
 FANG %>%
@@ -211,7 +213,7 @@ FANG %>%
   select(symbol, date, adjusted) %>%
   group_by(symbol) %>%
   # Apply roll apply Function
-  mutate(rolling_avg_30 = slidify_vec(adjusted,  ~ AVERAGE(.), 
+  mutate(rolling_avg_30 = slidify_vec(adjusted,  ~ mean(.), 
                                       .period = 30, .partial = TRUE))
 ```
 

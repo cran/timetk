@@ -60,8 +60,7 @@
 #'
 #' @examples
 #'
-#' library(tidyverse)
-#' library(tidyquant)
+#' library(dplyr)
 #' library(timetk)
 #'
 #' idx_FB <- FANG %>%

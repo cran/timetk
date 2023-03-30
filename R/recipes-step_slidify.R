@@ -102,8 +102,8 @@
 #'
 #' @examples
 #' library(recipes)
-#' library(tidyverse)
-#' library(tidyquant)
+#' library(dplyr)
+#' library(ggplot2)
 #' library(timetk)
 #'
 #' # Training Data
@@ -120,7 +120,7 @@
 #'
 #' # Create a recipe object with a step_slidify
 #' rec_ma_50 <- recipe(adjusted ~ ., data = FB_tbl) %>%
-#'     step_slidify(adjusted, period = 50, .f = ~ AVERAGE(.x))
+#'     step_slidify(adjusted, period = 50, .f = ~ mean(.x))
 #'
 #' # Bake the recipe object - Applies the Moving Average Transformation
 #' training_data_baked <- bake(prep(rec_ma_50), FB_tbl)
@@ -138,7 +138,7 @@
 #' # Use the `names` argument to create new columns instead of overwriting existing
 #'
 #' rec_ma_30_names <- recipe(adjusted ~ ., data = FB_tbl) %>%
-#'     step_slidify(adjusted, period = 30, .f = AVERAGE, names = "adjusted_ma_30")
+#'     step_slidify(adjusted, period = 30, .f = mean, names = "adjusted_ma_30")
 #'
 #' bake(prep(rec_ma_30_names), FB_tbl) %>%
 #'     ggplot(aes(date, adjusted)) +
@@ -215,7 +215,7 @@ prep.step_slidify <- function(x, training, info = NULL, ...) {
 
     col_names <- recipes::recipes_eval_select(x$terms, data = training, info = info)
 
-    check_type(training[, col_names])
+    check_type(training[, col_names], types = c("double", "integer"))
 
     if (!is.null(x$names)) {
         if (length(x$names) != length(col_names))

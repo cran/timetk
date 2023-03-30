@@ -60,8 +60,8 @@
 #'
 #' @examples
 #'
-#' library(tidyverse)
-#' library(tidyquant)
+#' library(dplyr)
+#' library(tidyr)
 #' library(recipes)
 #' library(timetk)
 #'
@@ -135,7 +135,7 @@ step_ts_clean_new <-
 prep.step_ts_clean <- function(x, training, info = NULL, ...) {
 
     col_names <- recipes_eval_select(x$terms, data = training, info = info)
-    recipes::check_type(training[, col_names])
+    recipes::check_type(training[, col_names], types = c("double", "integer"))
 
     # Lambda Calculation
     if (is.null(x$lambda[1])) {

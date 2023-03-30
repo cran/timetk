@@ -205,9 +205,8 @@ or a numeric value (e.g. \code{smooth_period = 365}).
 Time-based windows return the median number of observations in a window using \code{tk_get_trend()}.
 }
 \examples{
-
-library(tidyverse)
-library(tidyquant)
+\donttest{
+library(dplyr)
 library(lubridate)
 library(timetk)
 
@@ -228,7 +227,7 @@ FANG \%>\%
         .facet_ncol  = 2,     # 2-column layout
         .interactive = FALSE)
 
-\dontrun{
+
 # Can also group inside & use .color_var
 FANG \%>\%
     mutate(year = year(date)) \%>\%
@@ -240,7 +239,7 @@ FANG \%>\%
         .facet_ncol   = 4,
         .facet_scales = "free",
         .interactive  = FALSE)
-}
+
 
 # Can apply transformations to .value or .color_var
 # - .value = log(adjusted)
@@ -267,5 +266,5 @@ FANG \%>\%
         .smooth_period    = "5 years", # Smoother Period
         .facet_ncol       = 2,
         .interactive      = FALSE)
-
+}
 }

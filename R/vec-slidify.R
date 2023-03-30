@@ -78,8 +78,8 @@
 #' - [Slider R Package](https://slider.r-lib.org/) by Davis Vaughan
 #'
 #' @examples
-#' library(tidyverse)
-#' library(tidyquant)
+#' library(dplyr)
+#' library(ggplot2)
 #' library(timetk)
 #'
 #' # Training Data
@@ -126,12 +126,12 @@
 #'         geom_line(aes(y = adjusted_30_ma), color = "blue")
 #'
 #' # ---- Loess vs Moving Average ----
-#' # - Loess: Using `.degree = 0` to make less flexible. Comperable to a moving average.
+#' # - Loess: Using `.degree = 0` to make less flexible. Comparable to a moving average.
 #'
 #' FB_tbl %>%
 #'     mutate(
 #'         adjusted_loess_30 = smooth_vec(adjusted, period = 30, degree = 0),
-#'         adjusted_ma_30    = slidify_vec(adjusted, .f = AVERAGE,
+#'         adjusted_ma_30    = slidify_vec(adjusted, .f = mean,
 #'                                            .period = 30, .partial = TRUE)
 #'     ) %>%
 #'     ggplot(aes(date, adjusted)) +

@@ -20,6 +20,10 @@ versus the \code{.value}. Useful for evaluating external lagged regressors.}
 
 \item{.lags}{A seqence of one or more lags to evaluate.}
 }
+\value{
+A \code{tibble} or \code{data.frame} containing the autocorrelation, partial autocorrelation
+and cross correlation data.
+}
 \description{
 The \code{tk_acf_diagnostics()} function provides a simple interface to
 detect Autocorrelation (ACF), Partial Autocorrelation (PACF), and Cross Correlation (CCF) of Lagged
@@ -62,8 +66,7 @@ group-wise analysis. Rather, it's used for processing Cross Correlations (CCFs).
 Use \code{dplyr::group_by()} for processing multiple time series groups.
 }
 \examples{
-library(tidyverse)
-library(tidyquant)
+library(dplyr)
 library(timetk)
 
 # ACF, PACF, & CCF in 1 Data Frame

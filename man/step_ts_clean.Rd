@@ -99,8 +99,8 @@ or can be specified by setting \verb{lambda = numeric value}.
 }
 \examples{
 
-library(tidyverse)
-library(tidyquant)
+library(dplyr)
+library(tidyr)
 library(recipes)
 library(timetk)
 

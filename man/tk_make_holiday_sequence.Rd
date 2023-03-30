@@ -78,9 +78,10 @@ These simply populate
 }
 \examples{
 library(dplyr)
-library(tidyquant)
 library(timetk)
 
+# Set max.print to 50
+options_old <- options()$max.print
 options(max.print = 50)
 
 
@@ -122,6 +123,7 @@ FB_tbl \%>\%
                               skip_values      = c(holidays, weekends))
 
 
+options(max.print = options_old)
 
 }
 \seealso{

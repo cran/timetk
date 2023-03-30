@@ -77,8 +77,7 @@ be removed using \code{\link[recipes:step_rm]{recipes::step_rm()}}.
 }
 \examples{
 library(recipes)
-library(tidyverse)
-library(tidyquant)
+library(dplyr)
 library(timetk)
 
 FB_tbl <- FANG \%>\% filter(symbol == "FB")

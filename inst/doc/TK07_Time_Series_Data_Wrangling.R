@@ -12,8 +12,8 @@ knitr::opts_chunk$set(
 # devtools::load_all() # Travis CI fails on load_all()
 
 ## -----------------------------------------------------------------------------
-library(tidyverse)
-library(tidyquant) 
+library(dplyr)
+library(tidyr)
 library(timetk)
 
 ## -----------------------------------------------------------------------------
@@ -33,8 +33,9 @@ FANG %>%
 FANG %>%
   group_by(symbol) %>%
   summarise_by_time(
-    date, .by = "quarter",
-    volume = SUM(volume)
+    date, 
+    .by    = "quarter",
+    volume = sum(volume)
   ) %>%
   plot_time_series(date, volume, .facet_ncol = 2, .interactive = FALSE, .y_intercept = 0)
 
@@ -42,8 +43,9 @@ FANG %>%
 FANG %>%
   group_by(symbol) %>%
   summarise_by_time(
-    date, .by = "month",
-    adjusted = FIRST(adjusted)
+    date, 
+    .by = "month",
+    adjusted = first(adjusted)
   ) %>%
   plot_time_series(date, adjusted, .facet_ncol = 2, .interactive = FALSE)
 
@@ -63,12 +65,12 @@ FANG %>%
   group_by(symbol) %>%
   pad_by_time(date, .by = "hour") %>%
   mutate_at(vars(open:adjusted), .funs = ts_impute_vec, period = 1) %>%
-  filter_by_time(date, "start", FIRST(date) %+time% "1 month") %>%
+  filter_by_time(date, "start", first(date) %+time% "1 month") %>%
   plot_time_series(date, adjusted, .facet_ncol = 2, .interactive = FALSE) 
 
 ## -----------------------------------------------------------------------------
 # Make the rolling function
-roll_avg_30 <- slidify(.f = AVERAGE, .period = 30, .align = "center", .partial = TRUE)
+roll_avg_30 <- slidify(.f = mean, .period = 30, .align = "center", .partial = TRUE)
 
 # Apply the rolling function
 FANG %>%
@@ -86,7 +88,7 @@ FANG %>%
   select(symbol, date, adjusted) %>%
   group_by(symbol) %>%
   # Apply roll apply Function
-  mutate(rolling_avg_30 = slidify_vec(adjusted,  ~ AVERAGE(.), 
+  mutate(rolling_avg_30 = slidify_vec(adjusted,  ~ mean(.), 
                                       .period = 30, .partial = TRUE))
 
 ## -----------------------------------------------------------------------------

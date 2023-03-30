@@ -108,8 +108,7 @@
 #'
 #' @examples
 #'
-#' library(tidyverse)
-#' library(tidyquant)
+#' library(dplyr)
 #' library(lubridate)
 #' library(timetk)
 #'

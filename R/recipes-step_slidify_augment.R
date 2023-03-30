@@ -66,7 +66,7 @@
 #'
 #' @examples
 #' library(tidymodels)
-#' library(tidyverse)
+#' library(dplyr)
 #' library(timetk)
 #'
 #' m750 <- m4_monthly %>%
@@ -156,7 +156,7 @@ prep.step_slidify_augment <- function(x, training, info = NULL, ...) {
 
     col_names <- recipes::recipes_eval_select(x$terms, data = training, info = info)
 
-    check_type(training[, col_names])
+    check_type(training[, col_names], types = c("double", "integer"))
 
     step_slidify_augment_new(
         terms    = x$terms,

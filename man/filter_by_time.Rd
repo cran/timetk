@@ -16,6 +16,9 @@ If missing, attempts to auto-detect date column.}
 
 \item{.end_date}{The ending date for the filter sequence}
 }
+\value{
+Returns a \code{tibble} or \code{data.frame} that has been filtered.
+}
 \description{
 The easiest way to filter time-based \emph{\strong{start/end ranges}} using shorthand timeseries notation.
 See \code{\link[=filter_period]{filter_period()}} for applying filter expression by period (windows).
@@ -61,8 +64,7 @@ index is a POSIXct):
 }
 }
 \examples{
-library(tidyverse)
-library(tidyquant)
+library(dplyr)
 library(timetk)
 
 # Filter values in January 1st through end of February, 2013

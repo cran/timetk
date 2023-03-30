@@ -33,6 +33,9 @@ If NULL it will use the lowest value of the input variable.}
 \item{.end_date}{Specifies the end of the padded series.
 If NULL it will use the highest value of the input variable.}
 }
+\value{
+A \code{tibble} or \code{data.frame} with rows containing missing timestamps added.
+}
 \description{
 The easiest way to fill in missing timestamps or convert to a more
 granular period (e.g. quarter to month). Wraps the \code{padr::pad()} function
@@ -69,8 +72,8 @@ A pad value can be supplied that fills in missing numeric data. Note that this i
 Uses \code{tidyr::fill()} to fill missing observations using a fill strategy.
 }
 \examples{
-library(tidyverse)
-library(tidyquant)
+library(tibble)
+library(dplyr)
 library(timetk)
 
 # Create a quarterly series with 1 missing value
