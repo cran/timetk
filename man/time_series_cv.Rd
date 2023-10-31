@@ -44,7 +44,7 @@ which returns the maximum number of slices.}
 \item{point_forecast}{Whether or not to have the testing set be a single point forecast or to be a forecast horizon.
 The default is to be a forecast horizon. Default: \code{FALSE}}
 
-\item{...}{Not currently used.}
+\item{...}{These dots are for future extensions and must be empty.}
 }
 \value{
 An tibble with classes \code{time_series_cv}, \code{rset}, \code{tbl_df}, \code{tbl},
@@ -125,10 +125,9 @@ dataset below.
 }
 \examples{
 library(dplyr)
-library(timetk)
 
 # DATA ----
-m750 <- m4_monthly \%>\% filter(id == "M750")
+m750 <- m4_monthly \%>\% dplyr::filter(id == "M750")
 
 
 # RESAMPLE SPEC ----

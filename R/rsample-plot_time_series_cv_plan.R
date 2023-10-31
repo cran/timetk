@@ -30,7 +30,6 @@
 #' @examples
 #' library(dplyr)
 #' library(rsample)
-#' library(timetk)
 #'
 #' FB_tbl <- FANG %>%
 #'     filter(symbol == "FB") %>%
@@ -165,7 +164,6 @@ plot_ts_cv_dataframe <- function(.data, .date_var, .value, ...,
     if (!id_key_in_data) rlang::abort("The data frame must have 'id' and 'key' columns. Try using `tk_time_series_cv_plan()` to unpack the `.data`.")
 
     data_formatted %>%
-        dplyr::ungroup() %>%
         dplyr::group_by(.id) %>%
         plot_time_series(
             .date_var   = !! date_var_expr,

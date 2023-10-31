@@ -1,4 +1,4 @@
-## ---- include = FALSE---------------------------------------------------------
+## ----include = FALSE----------------------------------------------------------
 knitr::opts_chunk$set(
   message = FALSE,
   warning = FALSE,
@@ -10,6 +10,9 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+
+## ----echo=FALSE---------------------------------------------------------------
+knitr::include_graphics("timetk_version_2.jpg")
 
 ## ----setup--------------------------------------------------------------------
 library(dplyr)
@@ -65,7 +68,7 @@ taylor_30_min %>%
                    .x_lab = "Date (30-min intervals)",
                    .y_lab = "Energy Demand (MW)",
                    .color_lab = "Month") +
-  scale_y_continuous(labels = scales::comma_format())
+  scale_y_continuous(labels = scales::label_comma())
 
 ## -----------------------------------------------------------------------------
 m4_monthly %>%

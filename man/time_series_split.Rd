@@ -43,7 +43,7 @@ size specified by \code{initial} at each resample?.}
 \item{point_forecast}{Whether or not to have the testing set be a single point forecast or to be a forecast horizon.
 The default is to be a forecast horizon. Default: \code{FALSE}}
 
-\item{...}{Not currently used.}
+\item{...}{These dots are for future extensions and must be empty.}
 }
 \value{
 An \code{rsplit} object that can be used with the \code{training} and \code{testing}
@@ -101,10 +101,9 @@ slice will be returned.
 }
 \examples{
 library(dplyr)
-library(timetk)
 
 # DATA ----
-m750 <- m4_monthly \%>\% filter(id == "M750")
+m750 <- m4_monthly \%>\% dplyr::filter(id == "M750")
 
 # Get the most recent 3 years as testing, and previous 10 years as training
 m750 \%>\%

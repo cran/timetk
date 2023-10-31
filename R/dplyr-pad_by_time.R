@@ -68,12 +68,10 @@
 #' - This function wraps the `padr::pad()` function developed by Edwin Thoen.
 #'
 #' @examples
-#' library(tibble)
 #' library(dplyr)
-#' library(timetk)
 #'
 #' # Create a quarterly series with 1 missing value
-#' missing_data_tbl <- tibble(
+#' missing_data_tbl <- tibble::tibble(
 #'     date = tk_make_timeseries("2014-01-01", "2015-01-01", by = "quarter"),
 #'     value = 1:5
 #' ) %>%
@@ -132,9 +130,7 @@ pad_by_time <- function(.data, .date_var, .by = "auto",
                         .fill_na_direction = c("none", "down", "up", "downup", "updown"),
                         .start_date = NULL, .end_date = NULL) {
 
-    if (!tolower(.fill_na_direction[1]) %in% c("none", "down", "up", "downup", "updown")) {
-        rlang::abort("'.fill_na_direction' must be one of c('none', 'down', 'up', 'downup', 'updown')")
-    }
+    rlang::arg_match(.fill_na_direction)
 
     if (rlang::quo_is_missing(rlang::enquo(.date_var))) {
         date_var_text <- tk_get_timeseries_variables(.data)[1]
@@ -296,7 +292,7 @@ padder <- function(.data, .date_var, .by = "auto", .pad_value = NA, .fill_na_dir
 
     # Drop check_row_exists column
     ret <- ret %>%
-        dplyr::select(-check_row_exists)
+        dplyr::select(-"check_row_exists")
 
     # Fill NA
     if (.fill_na_direction != "none") {

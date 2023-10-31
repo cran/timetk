@@ -60,7 +60,6 @@
 #' @examples
 #' \donttest{
 #' library(dplyr)
-#' library(timetk)
 #'
 #' # ---- MULTIPLE FREQUENCY ----
 #' # Taylor 30-minute dataset from forecast package
@@ -272,8 +271,7 @@ plot_seasonal_diagnostics.data.frame <- function(.data, .date_var, .value, .face
         facet_ncol <- 1
     } else {
         facet_ncol <- data_formatted %>%
-            dplyr::select(facet_names) %>%
-            dplyr::distinct() %>%
+            dplyr::distinct(dplyr::pick(dplyr::all_of(facet_names))) %>%
             nrow()
     }
 
@@ -324,7 +322,7 @@ plot_seasonal_diagnostics.grouped_df <- function(.data, .date_var, .value, .face
     # ---- DATA SETUP ----
 
     # Ungroup Data
-    data_formatted <- .data %>% dplyr::ungroup()
+    data_formatted <- dplyr::ungroup(.data)
 
     # ---- PLOT SETUP ----
     plot_seasonal_diagnostics(

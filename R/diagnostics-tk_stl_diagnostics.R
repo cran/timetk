@@ -47,7 +47,6 @@
 #'
 #' @examples
 #' library(dplyr)
-#' library(timetk)
 #'
 #'
 #' # ---- GROUPS & TRANSFORMATION ----
@@ -112,7 +111,7 @@ tk_stl_diagnostics.data.frame <- function(.data, .date_var, .value,
 
     # STL Calculation
     stl_obj <- data_formatted %>%
-        dplyr::pull(.value_mod) %>%
+        dplyr::pull(".value_mod") %>%
         stats::ts(frequency = freq) %>%
         stats::stl(s.window = "periodic", t.window = trnd, robust = TRUE)
 
@@ -157,7 +156,7 @@ tk_stl_diagnostics.grouped_df <- function(.data, .date_var, .value,
                 .message      = .message
             )
         )) %>%
-        dplyr::select(-data) %>%
+        dplyr::select(-"data") %>%
         tidyr::unnest(cols = nested.col) %>%
         dplyr::group_by_at(.vars = group_names)
 

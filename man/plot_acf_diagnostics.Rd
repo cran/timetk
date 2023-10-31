@@ -56,7 +56,7 @@ versus the \code{.value}. Useful for evaluating external lagged regressors.}
 
 \item{.line_color}{Line color. Use keyword: "scale_color" to change the color by the facet.}
 
-\item{.line_size}{Line size}
+\item{.line_size}{Line size (linewidth)}
 
 \item{.line_alpha}{Line opacity. Adjust the transparency of the line. Range: (0, 1)}
 
@@ -137,7 +137,6 @@ within this range. Those that don't may be significant autocorrelations.
 \examples{
 library(dplyr)
 library(ggplot2)
-library(timetk)
 
 
 # Apply Transformations

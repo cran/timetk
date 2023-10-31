@@ -78,7 +78,6 @@
 #'
 #' @examples
 #' library(dplyr)
-#' library(timetk)
 #'
 #' walmart_sales_weekly %>%
 #'     filter(id %in% c("1_1", "1_3")) %>%
@@ -178,7 +177,7 @@ tk_anomaly_diagnostics.grouped_df <- function(.data, .date_var, .value,
                 .message       = .message
             )
         )) %>%
-        dplyr::select(-data) %>%
+        dplyr::select(-"data") %>%
         tidyr::unnest(cols = nested.col) %>%
         dplyr::group_by_at(.vars = group_names)
 
@@ -234,7 +233,7 @@ iqr_vec <- function(x, alpha = 0.05, max_anoms = 0.2, verbose = FALSE) {
             abs_diff_upper = ifelse(value >= limit_upper, abs(value - limit_upper), 0),
             max_abs_diff = ifelse(abs_diff_lower > abs_diff_upper, abs_diff_lower, abs_diff_upper)
         ) %>%
-        dplyr::select(index, dplyr::everything()) %>%
+        dplyr::relocate(index) %>%
         dplyr::select(-c(abs_diff_lower, abs_diff_upper)) %>%
         # Sort by absolute distance from centerline of limits
         dplyr::mutate(
@@ -284,7 +283,7 @@ iqr_vec <- function(x, alpha = 0.05, max_anoms = 0.2, verbose = FALSE) {
     } else {
         # All outliers, pick last limits
         limit_tbl <- vals_tbl %>%
-            dplyr::slice(n())
+            dplyr::slice_tail(n = 1)
         limits_vec <- c(
             limit_lower = limit_tbl$limit_lower,
             limit_upper = limit_tbl$limit_upper
@@ -294,15 +293,15 @@ iqr_vec <- function(x, alpha = 0.05, max_anoms = 0.2, verbose = FALSE) {
     # Return results
     if (verbose) {
         outlier_list <- list(
-            outlier = vals_tbl %>% dplyr::arrange(index) %>% dplyr::pull(outlier_reported),
-            outlier_idx = vals_tbl %>% dplyr::filter(outlier_reported == "Yes") %>% dplyr::pull(index),
-            outlier_vals = vals_tbl %>% dplyr::filter(outlier_reported == "Yes") %>% dplyr::pull(value),
-            outlier_direction = vals_tbl %>% dplyr::filter(outlier_reported == "Yes") %>% dplyr::pull(direction),
+            outlier = vals_tbl %>% dplyr::arrange(index) %>% dplyr::pull("outlier_reported"),
+            outlier_idx = vals_tbl %>% dplyr::filter(outlier_reported == "Yes") %>% dplyr::pull("index"),
+            outlier_vals = vals_tbl %>% dplyr::filter(outlier_reported == "Yes") %>% dplyr::pull("value"),
+            outlier_direction = vals_tbl %>% dplyr::filter(outlier_reported == "Yes") %>% dplyr::pull("direction"),
             critical_limits = limits_vec,
             outlier_report = vals_tbl_filtered
         )
         return(outlier_list)
     } else {
-        return(vals_tbl %>% dplyr::arrange(index) %>% dplyr::pull(outlier_reported))
+        return(vals_tbl %>% dplyr::arrange(index) %>% dplyr::pull("outlier_reported"))
     }
 }
