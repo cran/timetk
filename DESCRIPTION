@@ -1,7 +1,7 @@
 Package: timetk
 Type: Package
 Title: A Tool Kit for Working with Time Series
-Version: 2.9.0
+Version: 2.9.1
 Authors@R: c(
     person("Matt", "Dancho", email = "mdancho@business-science.io", role = c("aut", "cre")),
     person("Davis", "Vaughan", email = "dvaughan@business-science.io", role = c("aut"))
@@ -26,12 +26,12 @@ Imports: recipes (>= 1.0.4), rsample, dplyr (>= 1.0.0), ggplot2 (>=
 Suggests: modeltime, glmnet, workflows, parsnip, tune (>= 0.1.2),
         knitr, rmarkdown, broom, scales, testthat, fracdiff,
         timeSeries, tseries, trelliscopejs
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2023-10-31 19:15:26 UTC; mdancho
+Packaged: 2025-08-29 11:46:40 UTC; mdancho
 Author: Matt Dancho [aut, cre],
   Davis Vaughan [aut]
 Maintainer: Matt Dancho <mdancho@business-science.io>
 Repository: CRAN
-Date/Publication: 2023-10-31 22:30:02 UTC
+Date/Publication: 2025-08-29 12:30:02 UTC
